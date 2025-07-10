@@ -1,0 +1,186 @@
+﻿<Window x:Class="WpfApp1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp1"
+        xmlns:helix="http://helix-toolkit.org/wpf"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
+        mc:Ignorable="d"
+        Title="Slicer" Height="Auto" Width="1200" WindowStartupLocation="CenterScreen"
+        >
+   <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        
+        
+        <Border CornerRadius="10 10 0 0">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="MidnightBlue" Offset="0"></GradientStop>
+                    <GradientStop Color="DarkBlue" Offset="1"></GradientStop>
+                    
+                    <!-- COLORS
+                    Blue dark 264653
+                    Blue light 2a9d8f
+                    Red e76f51
+                    oragne f4a261
+                    yellow  e9c46a-->
+
+                </LinearGradientBrush>
+            </Border.Background>
+            
+            <!-- Slicer settings -->
+            <Grid>
+                <!-- Main Menu -->
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" Margin="20 0 0 0" HorizontalAlignment="Center">
+                        <fa:ImageAwesome Icon="Cubes" Foreground="White" Width="20"></fa:ImageAwesome>
+                        <TextBlock Text="Slicer" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" Foreground="White" Margin="10 0 0 0"></TextBlock>
+                    </StackPanel>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0 0 20 0">
+                    <Button Click="OnClickLoadSTL" Style="{StaticResource menuButton}">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                <fa:ImageAwesome Icon="Upload" Style="{StaticResource buttonIcon}"/>
+                                <TextBlock Text="Upload STL file" Style="{StaticResource buttonText}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Button>
+                    
+                    <Button Style="{StaticResource menuButtonGray}" Margin="20 0 0 0" Click="OnClickEditSettings">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                <fa:ImageAwesome Icon="Gear" Style="{StaticResource buttonIcon}"/>
+                                <TextBlock Text="Edit settings" Style="{StaticResource buttonText}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <Grid Grid.Row="1">
+            <Border CornerRadius="0 0 10 10">
+                <Border.Background>
+                    <SolidColorBrush Color="White"></SolidColorBrush>
+                </Border.Background>
+            </Border>
+            
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="700"/>
+                    <ColumnDefinition Width="500"/>
+                </Grid.ColumnDefinitions>
+                
+                <Border Grid.Column="0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="60"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <!-- 3D Viewer for the STL model -->
+                        <helix:HelixViewport3D Grid.Row="1" MinHeight="500" Name="HelixViewport" ShowCameraInfo="True">
+                            <helix:HelixViewport3D.Camera>
+                                <PerspectiveCamera Position="16.603, 230.192, 43.984" LookDirection="-16.603, -230.192, -43.984" UpDirection="0.040, 0.659, 0.751" FieldOfView="90" />
+                            </helix:HelixViewport3D.Camera>
+                            <helix:DefaultLights />
+                        </helix:HelixViewport3D>
+                        
+                        <StackPanel HorizontalAlignment="Stretch" Grid.Row="0">
+                            <!-- Slider for scaling -->
+                            <TextBlock Style="{StaticResource buttonText}" Text="Scale Model:" Margin="5" />
+                            <Slider ValueChanged="OnScaleSliderChanged" HorizontalAlignment="Left" Width="200" Name="ScaleSlider" Minimum="0.2" Maximum="5" Value="1" Margin="5" 
+                            />
+                            <TextBlock x:Name="ScaleValueTextBlock" Text="Scale: 1.0" HorizontalAlignment="Center" Margin="5" />
+                            
+                            <!-- Other buttons etc for manipulating 3D model -->
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                
+                <Border Grid.Column="1" BorderBrush="DarkBlue" BorderThickness="3 0 0 0 " >
+                    <!-- Buttons for slicing layer / entire model -->
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="100"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="80"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        
+                        <!--<StackPanel Grid.Row="0">
+                            ~1~ Controls for configuring slicing plane @1@
+                            <TextBlock Text="Slicing Plane Height:" Margin="5" />
+                            <Slider Name="SlicingPlaneSlider" Minimum="0" Maximum="200" Margin="5" 
+                                    ValueChanged="OnSlicingPlaneHeightChanged" />
+                            <TextBlock x:Name="SliderValueTextBlock" Text="0 mm" HorizontalAlignment="Center" Margin="5" />
+                        </StackPanel>-->
+                        
+                        
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
+                            
+                            
+                            <Button Style="{StaticResource menuButtonDark}" Click="OnClickSliceModel" Margin="5 5 20 5">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <fa:ImageAwesome Icon="ArrowsV" Style="{StaticResource buttonIcon}"/>
+                                        <TextBlock Text="Slice" Style="{StaticResource buttonText}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Button>
+                            
+                        </StackPanel>
+                        
+                        <!-- Slicing view-->
+                        <StackPanel Grid.Row="1" Height="auto">
+                            <Border Padding="15" Margin="5" Background="White" Grid.Row="2">
+                                <Canvas x:Name="SliceCanvas" Width="440" Height="440" MaxHeight="440" MaxWidth="440" Background="White" HorizontalAlignment="Center"/>
+                            </Border>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Row="2" Margin="0 10">
+                            <!-- Controls for configuring slicing plane -->
+                            <TextBlock Text="Select layer" Margin="5" />
+                            <Slider IsEnabled="False" Name="SlicingPlaneSlider" Margin="5" MaxWidth="440" Minimum="0" Maximum="1" 
+                                    ValueChanged="OnSlicingLayerChange" Interval="1" IsSnapToTickEnabled="True" TickFrequency="1"/>
+                            <TextBlock x:Name="SliderValueTextBlock" Text="0" HorizontalAlignment="Center" Margin="5" />
+                        </StackPanel>
+                        
+                        
+                        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button Style="{StaticResource menuButtonGray}" Click="OnClickExportSlice" Margin="5">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <fa:ImageAwesome Icon="Download" Style="{StaticResource buttonIcon}"/>
+                                        <TextBlock Text="Export layer" Style="{StaticResource buttonText}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Button>
+                            
+                            <Button Style="{StaticResource menuButtonDark}" Click="OnClickExportAll" Margin="5">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <fa:ImageAwesome Icon="Download" Style="{StaticResource buttonIcon}"/>
+                                        <TextBlock Text="Export GCode" Style="{StaticResource buttonText}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Button>
+                            
+                        </StackPanel>
+                    </Grid>
+                    
+                    
+                </Border>
+                
+            </Grid>
+        </Grid>
+    </Grid>        
+
+</Window>

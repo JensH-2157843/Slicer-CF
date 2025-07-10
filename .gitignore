@@ -1,0 +1,68 @@
+# Developer / environment specific
+*.vscode
+*.idea
+*.DS_Store
+*.env
+
+object_files/
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Ignore builds & libraries
+build
+lib
+
+src_c\#/WpfApp1/PolyPearl_Tower.STL
+
+src_c#/.vs/ProjectEvaluation/wpfapp1.metadata.v9.bin
+
+src_c#/.vs/ProjectEvaluation/wpfapp1.projects.v9.bin
+
+src_c#/.vs/ProjectEvaluation/wpfapp1.strings.v9.bin
+
+src_c#/.vs/WpfApp1/DesignTimeBuild/.dtbcache.v2
+
+src_c#/.vs/WpfApp1/FileContentIndex/0036a0f7-41c0-4612-bdf4-9e5c33853765.vsidx
+
+src_c#/.vs/WpfApp1/FileContentIndex/410b4d12-b864-4668-8231-c0b52ec55981.vsidx
+
+src_c#/.vs/WpfApp1/FileContentIndex/a390e511-444d-49f3-a542-cd551a013783.vsidx
+
+src_c#/.vs/WpfApp1/v17/.futdcache.v2
+
+src_c#/.vs/WpfApp1/v17/.suo
+
+src_c#/.vs/WpfApp1/v17/DocumentLayout.json
+
+src_c#/WpfApp1.sln.DotSettings.user
