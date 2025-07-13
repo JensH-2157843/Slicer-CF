@@ -126,6 +126,8 @@ public class GCodeConverter
         // Order the paths such that extruder makes least amount of unessecary travel
         PathsD orderedPaths = OrderPaths(slice);
         // PathsD orderedPaths = slice;
+        PointD prev = new PointD();
+        double tolerance = 0.000001;
 
 
         // Generate G-code for each path
@@ -135,20 +137,24 @@ public class GCodeConverter
 
             // Move to the start of the path
             PointD startPoint = path[0];
-            gcode.Add(GCodeCommands.MoveToPositionCommand(startPoint.x + xOffset, startPoint.y + yOffset, 1500));
+            if(! (Math.Abs(prev.x - startPoint.x) < tolerance && Math.Abs(startPoint.y - prev.y) < tolerance))
+            {
+                gcode.Add(GCodeCommands.MoveToPositionCommand(startPoint.x + xOffset, startPoint.y + yOffset, 1500));
 
+            }
             // Extrude along the path
             for (int i = 1; i < path.Count; i++)
             {
                 PointD previousPoint = path[i - 1];
                 PointD currentPoint = path[i];
 
-                double distance = CalculateDistance(previousPoint, currentPoint);
+                // double distance = CalculateDistance(previousPoint, currentPoint);
                 double extrusion = GCodeHelper.CalculateExtrusion(previousPoint, currentPoint, settings);
                 extrusionAmount += extrusion;
 
                 gcode.Add(GCodeCommands.ExtrudeToPositionCommand(currentPoint.x + xOffset, currentPoint.y + yOffset, extrusionAmount,
                     500));
+                prev = currentPoint;
             }
 
             // Close the loop if the path is closed
@@ -186,6 +192,7 @@ public class GCodeConverter
         var (xOffset, yOffset) = GCodeHelper.GetXAndYOffsetsToCenter(slice, settings);
 
         var tempcode = GenerateGCodeFromSlice(slice, xOffset, yOffset);
+        Console.WriteLine("Generated GCode from slice " + tempcode);
         gcodeCommandList.AddRange(tempcode);
         return gcodeCommandList;
         

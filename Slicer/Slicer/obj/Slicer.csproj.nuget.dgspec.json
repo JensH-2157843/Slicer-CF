@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\jensh\\Documents\\GitHub\\CompFab-Slicer\\Slicer\\Slicer\\Slicer.csproj": {}
+    "C:\\Users\\jensh\\Documents\\GitHub\\Slicer-CF\\Slicer\\Slicer\\Slicer.csproj": {}
   },
   "projects": {
-    "C:\\Users\\jensh\\Documents\\GitHub\\CompFab-Slicer\\Slicer\\Slicer\\Slicer.csproj": {
+    "C:\\Users\\jensh\\Documents\\GitHub\\Slicer-CF\\Slicer\\Slicer\\Slicer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jensh\\Documents\\GitHub\\CompFab-Slicer\\Slicer\\Slicer\\Slicer.csproj",
+        "projectUniqueName": "C:\\Users\\jensh\\Documents\\GitHub\\Slicer-CF\\Slicer\\Slicer\\Slicer.csproj",
         "projectName": "Slicer",
-        "projectPath": "C:\\Users\\jensh\\Documents\\GitHub\\CompFab-Slicer\\Slicer\\Slicer\\Slicer.csproj",
+        "projectPath": "C:\\Users\\jensh\\Documents\\GitHub\\Slicer-CF\\Slicer\\Slicer\\Slicer.csproj",
         "packagesPath": "C:\\Users\\jensh\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jensh\\Documents\\GitHub\\CompFab-Slicer\\Slicer\\Slicer\\obj\\",
+        "outputPath": "C:\\Users\\jensh\\Documents\\GitHub\\Slicer-CF\\Slicer\\Slicer\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\jensh\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -53,12 +53,30 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.13, 8.0.13]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[8.0.13, 8.0.13]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.13, 8.0.13]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.13, 8.0.13]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.403/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Users\\jensh\\.dotnet\\sdk\\9.0.200/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

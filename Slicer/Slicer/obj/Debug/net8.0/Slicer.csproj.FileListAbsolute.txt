@@ -1,0 +1,15 @@
+C:\Users\jensh\Documents\GitHub\Slicer-CF\Slicer\Slicer\bin\Debug\net8.0\Slicer.exe
+C:\Users\jensh\Documents\GitHub\Slicer-CF\Slicer\Slicer\bin\Debug\net8.0\Slicer.deps.json
+C:\Users\jensh\Documents\GitHub\Slicer-CF\Slicer\Slicer\bin\Debug\net8.0\Slicer.runtimeconfig.json
+C:\Users\jensh\Documents\GitHub\Slicer-CF\Slicer\Slicer\bin\Debug\net8.0\Slicer.dll
+C:\Users\jensh\Documents\GitHub\Slicer-CF\Slicer\Slicer\bin\Debug\net8.0\Slicer.pdb
+C:\Users\jensh\Documents\GitHub\Slicer-CF\Slicer\Slicer\obj\Debug\net8.0\Slicer.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\jensh\Documents\GitHub\Slicer-CF\Slicer\Slicer\obj\Debug\net8.0\Slicer.AssemblyInfoInputs.cache
+C:\Users\jensh\Documents\GitHub\Slicer-CF\Slicer\Slicer\obj\Debug\net8.0\Slicer.AssemblyInfo.cs
+C:\Users\jensh\Documents\GitHub\Slicer-CF\Slicer\Slicer\obj\Debug\net8.0\Slicer.csproj.CoreCompileInputs.cache
+C:\Users\jensh\Documents\GitHub\Slicer-CF\Slicer\Slicer\obj\Debug\net8.0\Slicer.sourcelink.json
+C:\Users\jensh\Documents\GitHub\Slicer-CF\Slicer\Slicer\obj\Debug\net8.0\Slicer.dll
+C:\Users\jensh\Documents\GitHub\Slicer-CF\Slicer\Slicer\obj\Debug\net8.0\refint\Slicer.dll
+C:\Users\jensh\Documents\GitHub\Slicer-CF\Slicer\Slicer\obj\Debug\net8.0\Slicer.pdb
+C:\Users\jensh\Documents\GitHub\Slicer-CF\Slicer\Slicer\obj\Debug\net8.0\Slicer.genruntimeconfig.cache
+C:\Users\jensh\Documents\GitHub\Slicer-CF\Slicer\Slicer\obj\Debug\net8.0\ref\Slicer.dll

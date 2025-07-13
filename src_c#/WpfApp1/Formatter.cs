@@ -7,7 +7,7 @@ public class Formatter
     public static string FormatDouble(double value)
     {
         // Ensure consistent floating-point formatting with '.' as the decimal separator (not ,)
-        return value.ToString("F2", CultureInfo.InvariantCulture);
+        return value.ToString(CultureInfo.InvariantCulture);
     }
 
     public static string FormatInt(int value)

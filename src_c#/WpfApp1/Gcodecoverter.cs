@@ -12,7 +12,7 @@ public class Gcodecoverter
     private double _nozzleSize = 0.4;
     private double _layerHeight = 0.2;
     private double _filamentArea = 2.4052818754047; // pi * (filimant_radius)² = 1.75/2
-    private double tolerance = 0.00000001;
+    private double tolerance = 0.000001;
         
 
     public void Gcode(PathsD paths, string filename = "C://Users//jensh//Documents//GitHub//CompFab-Slicer//test.gcode"){

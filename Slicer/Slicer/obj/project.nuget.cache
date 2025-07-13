@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "/sfUCuVGkvA=",
+  "dgSpecHash": "KF3A5mAXCoU=",
   "success": true,
-  "projectFilePath": "C:\\Users\\jensh\\Documents\\GitHub\\CompFab-Slicer\\Slicer\\Slicer\\Slicer.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\jensh\\Documents\\GitHub\\Slicer-CF\\Slicer\\Slicer\\Slicer.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\jensh\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.13\\microsoft.netcore.app.ref.8.0.13.nupkg.sha512",
+    "C:\\Users\\jensh\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.13\\microsoft.windowsdesktop.app.ref.8.0.13.nupkg.sha512",
+    "C:\\Users\\jensh\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.13\\microsoft.aspnetcore.app.ref.8.0.13.nupkg.sha512",
+    "C:\\Users\\jensh\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.13\\microsoft.netcore.app.host.win-x64.8.0.13.nupkg.sha512"
+  ],
   "logs": []
 }
