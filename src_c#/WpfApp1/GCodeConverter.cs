@@ -113,12 +113,11 @@ public class GCodeConverter
 
         // Use epsilon for floating-point comparisons
         const double epsilon = 1e-6;
-        
         // return first.x == last.x && first.y == last.y;
         return Math.Abs(first.x - last.x) < epsilon && Math.Abs(first.y - last.y) < epsilon;
     }
     
-    private List<string> GenerateGCodeFromSlice(PathsD slice, double xOffset, double yOffset)
+    private List<string> GenerateGCodeFromSlice(PathsD slice, double xOffset, double yOffset, int layer)
     {
         List<string> gcode = new List<string>();
         double extrusionAmount = 0.0;
@@ -127,9 +126,12 @@ public class GCodeConverter
         PathsD orderedPaths = OrderPaths(slice);
         // PathsD orderedPaths = slice;
         PointD prev = new PointD();
+        PointD start = orderedPaths[0][0];
+        bool isFirst = true;
         double tolerance = 0.000001;
+        int counter = 0;
 
-
+        
         // Generate G-code for each path
         foreach (var path in orderedPaths)
         {
@@ -139,8 +141,18 @@ public class GCodeConverter
             PointD startPoint = path[0];
             if(! (Math.Abs(prev.x - startPoint.x) < tolerance && Math.Abs(startPoint.y - prev.y) < tolerance))
             {
+                if(!(Math.Abs(prev.x - start.x) < tolerance && Math.Abs(start.y - prev.y) < tolerance) && (!isFirst || layer != 0))
+                {
+                    ++counter;
+                    double closingExtrusion = GCodeHelper.CalculateExtrusion(prev, start, settings);
+                    extrusionAmount += closingExtrusion;
+                    gcode.Add(GCodeCommands.ExtrudeToPositionCommand(start.x + xOffset, start.y + yOffset,
+                            extrusionAmount,
+                            500));
+                } else isFirst = false;
                 gcode.Add(GCodeCommands.MoveToPositionCommand(startPoint.x + xOffset, startPoint.y + yOffset, 1500));
-
+                start = startPoint;
+                
             }
             // Extrude along the path
             for (int i = 1; i < path.Count; i++)
@@ -159,18 +171,21 @@ public class GCodeConverter
 
             // Close the loop if the path is closed
             // (Isn't this done automatically with clipper -- last point is first point?)
-            if (IsPathClosed(path))
-            {
-                PointD lastPoint = path[^1];
-                double closingDistance = CalculateDistance(lastPoint, startPoint);
-                double closingExtrusion = GCodeHelper.CalculateExtrusion(lastPoint, startPoint, settings);
-                extrusionAmount += closingExtrusion;
+            //if (IsPathClosed(path))
+            //{
+            //    ++ counter;
+            //    PointD lastPoint = path[^1];
+                // double closingDistance = CalculateDistance(lastPoint, startPoint);
+            //    double closingExtrusion = GCodeHelper.CalculateExtrusion(lastPoint, startPoint, settings);
+            //    extrusionAmount += closingExtrusion;
 
-                gcode.Add(GCodeCommands.ExtrudeToPositionCommand(startPoint.x + xOffset, startPoint.y + yOffset, extrusionAmount,
-                    500));
-            }
+            //    gcode.Add(GCodeCommands.ExtrudeToPositionCommand(startPoint.x + xOffset, startPoint.y + yOffset,
+            //        extrusionAmount,
+            //        500));
+            //}
         }
-
+        
+        //Console.WriteLine(counter);
         return gcode;
     }
 
@@ -178,7 +193,7 @@ public class GCodeConverter
     /**
      * Takes a single slice and produces gcode to print the given layer
      */
-    private List<string> SliceToGCode(PathsD slice)
+    private List<string> SliceToGCode(PathsD slice, int layer)
     {
         if (slice.Count == 0)
         {
@@ -191,8 +206,7 @@ public class GCodeConverter
         // Calculate the bounding box of the model
         var (xOffset, yOffset) = GCodeHelper.GetXAndYOffsetsToCenter(slice, settings);
 
-        var tempcode = GenerateGCodeFromSlice(slice, xOffset, yOffset);
-        Console.WriteLine("Generated GCode from slice " + tempcode);
+        var tempcode = GenerateGCodeFromSlice(slice, xOffset, yOffset, layer);
         gcodeCommandList.AddRange(tempcode);
         return gcodeCommandList;
         
@@ -350,7 +364,7 @@ public class GCodeConverter
         // Initial commands
         gcodeCommandList.AddRange(GetInitialCommands());
             
-        List<string> generatedGCode = SliceToGCode(slice);
+        List<string> generatedGCode = SliceToGCode(slice, layer);
         gcodeCommandList.Add($";LAYER: {layer}");
         gcodeCommandList.AddRange(generatedGCode);
         
@@ -415,7 +429,7 @@ public class GCodeConverter
             int layer = kvp.Key;
             PathsD slice = kvp.Value;
             
-            List<string> generatedGCode = SliceToGCode(slice);
+            List<string> generatedGCode = SliceToGCode(slice, layer);
             
             gcodeCommandList.Add($";LAYER: {layer}");
             gcodeCommandList.Add(GCodeCommands.MoveZCommand((layer + 1) * settings.LayerHeight));
