@@ -7,7 +7,7 @@
         xmlns:helix="http://helix-toolkit.org/wpf"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
-        Title="Slicer" Height="Auto" Width="1200" WindowStartupLocation="CenterScreen"
+        Title="Slicer" Height="Auto" Width="Auto" WindowStartupLocation="CenterScreen" WindowState="Maximized"
         >
    <Grid>
         <Grid.RowDefinitions>
@@ -73,8 +73,8 @@
             
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="700"/>
-                    <ColumnDefinition Width="500"/>
+                    <ColumnDefinition Width="700*"/>
+                    <ColumnDefinition Width="550*"/>
                 </Grid.ColumnDefinitions>
                 
                 <Border Grid.Column="0">
@@ -141,7 +141,7 @@
                         <!-- Slicing view-->
                         <StackPanel Grid.Row="1" Height="auto">
                             <Border Padding="15" Margin="5" Background="White" Grid.Row="2">
-                                <Canvas x:Name="SliceCanvas" Width="440" Height="440" MaxHeight="440" MaxWidth="440" Background="White" HorizontalAlignment="Center"/>
+                                <Canvas x:Name="SliceCanvas" Width="550" Height="550" Background="White" HorizontalAlignment="Center"/>
                             </Border>
                         </StackPanel>
                         
