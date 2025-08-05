@@ -11,18 +11,15 @@ public class GCodeHelper
     public static double CalculateExtrusion(PointD p1, PointD p2, SlicerSettings slicerSettings)
     {
         // Fetch slicer settings
-        double nozzleSize = slicerSettings.NozzleDiameter;
-        double layerHeight = slicerSettings.LayerHeight;
-        double filamentDiameter = slicerSettings.FilamentDiameter;
-
-        // Calculate filament cross-sectional area
-        double filamentArea = Math.PI * Math.Pow(filamentDiameter / 2, 2);
+        decimal nozzleSize = slicerSettings.NozzleDiameter;
+        decimal layerHeight = slicerSettings.LayerHeight;
+        double filamentArea = slicerSettings.FilamentArea;
 
         // Distance between the two points
         double distance = Math.Sqrt(Math.Pow(p2.x - p1.x, 2) + Math.Pow(p2.y - p1.y, 2));
 
         // Calculate extrusion amount based on the volume of extruded material
-        double extrusionAmount = (distance * nozzleSize * layerHeight) / filamentArea;
+        double extrusionAmount = (distance * decimal.ToDouble(nozzleSize * layerHeight)) / filamentArea;
 
         return extrusionAmount;
     }
@@ -59,8 +56,8 @@ public class GCodeHelper
         double modelHeight = modelMaxY - modelMinY;
 
         // Calculate offsets for centering
-        double xOffset = (settings.BedWidth / 2) - (modelWidth / 2) - modelMinX;
-        double yOffset = (settings.BedDepth / 2) - (modelHeight / 2) - modelMinY;
+        double xOffset = (decimal.ToDouble(settings.BedWidth / 2)) - (modelWidth / 2) - modelMinX;
+        double yOffset = (decimal.ToDouble(settings.BedDepth / 2)) - (modelHeight / 2) - modelMinY;
 
         return new Tuple<double, double>(xOffset, yOffset);
     }

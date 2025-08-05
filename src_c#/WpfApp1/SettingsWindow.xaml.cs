@@ -33,20 +33,20 @@ public partial class SettingsWindow : Window
 
     private void InitializeTextValues()
     {
-        layerHeight.Text = Formatter.FormatDouble(_settings.LayerHeight);
+        layerHeight.Text = Formatter.FormatDecimal(_settings.LayerHeight);
         extruderTemp.Text = Formatter.FormatInt(_settings.NozzleTemperature);
         bedTemp.Text = Formatter.FormatInt(_settings.BedTemperature);
-        filamentDiam.Text = Formatter.FormatDouble(_settings.FilamentDiameter);
-        nozzleDiam.Text = Formatter.FormatDouble(_settings.NozzleDiameter);
+        filamentDiam.Text = Formatter.FormatDecimal(_settings.FilamentDiameter);
+        nozzleDiam.Text = Formatter.FormatDecimal(_settings.NozzleDiameter);
     }
 
     private void UpdateAllValues()
     {
-        UpdatedSettings.LayerHeight = Formatter.FormatString(layerHeight.Text);
+        UpdatedSettings.LayerHeight = Formatter.FormatStringDecimal(layerHeight.Text);
         UpdatedSettings.NozzleTemperature = Formatter.FormatSringToInt(extruderTemp.Text);
         UpdatedSettings.BedTemperature = Formatter.FormatSringToInt(bedTemp.Text);
-        UpdatedSettings.FilamentDiameter = Formatter.FormatString(filamentDiam.Text);
-        UpdatedSettings.NozzleDiameter = Formatter.FormatString(nozzleDiam.Text);
+        UpdatedSettings.FilamentDiameter = Formatter.FormatStringDecimal(filamentDiam.Text);
+        UpdatedSettings.NozzleDiameter = Formatter.FormatStringDecimal(nozzleDiam.Text);
     }
     
     private void OnSaveSettingsClick(object sender, RoutedEventArgs e)

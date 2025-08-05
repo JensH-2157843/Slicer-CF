@@ -9,10 +9,10 @@ public class Slicer
 {
     // private ModelVisual3D stlModel;
     // private GeometryModel3D geometryModel;
-    private const double tolerance = 0.0001;
+    private const decimal tolerance = 0.0000001m;
     private SlicerSettings settings;
     
-    private PathD clip = new PathD
+    /*private PathD clip = new PathD
     {
         new PointD(-110, -110),
         new PointD(110, -110),
@@ -20,6 +20,7 @@ public class Slicer
         new PointD(-110, 110),
         new PointD(-110, -110)
     };
+    */
 
     public Slicer(SlicerSettings settings)
     {
@@ -42,7 +43,7 @@ public class Slicer
         Console.WriteLine("NozzleDiameter: " + updatedSettings.NozzleDiameter);*/
     }
 
-    public PathsD? SliceAndGeneratePaths(double height, ModelVisual3D model, double scale)
+    public PathsD? SliceAndGeneratePaths(decimal height, ModelVisual3D model, decimal scale)
     {
         // Apply transformations to content
         GeometryModel3D geometryModel = model.Content as GeometryModel3D;
@@ -52,8 +53,8 @@ public class Slicer
             return null;
         }
         
-        var stlTransform = model.Transform;
-        var scaleTransform = new ScaleTransform3D(scale, scale, scale);
+        //var stlTransform = model.Transform;
+        var scaleTransform = new ScaleTransform3D(decimal.ToDouble(scale), decimal.ToDouble(scale), decimal.ToDouble(scale));
         
         var intersections = SliceModelAtHeight(height, geometryModel, scaleTransform);
         if (intersections.Count > 0)
@@ -76,7 +77,7 @@ public class Slicer
      * Slice model using direct Plane-Triangle intersections and
      * connecting calculated intersection lines
      */
-    private PathsD SliceModelAtHeight(double height, GeometryModel3D geometryModel, Transform3D transform)
+    private PathsD SliceModelAtHeight(decimal height, GeometryModel3D geometryModel, Transform3D transform)
     {
         // Create list of PathD paths (list of point pairs that indicate line segments)
         PathsD lineSegments = new PathsD();
@@ -103,7 +104,7 @@ public class Slicer
             // Slice the triangle and get the intersection points / line segments
             // with the slicing plane
             // Creates a list of line segments from the plane-triangle intersections
-            var intersections = SliceTriangle(v1, v2, v3, height);
+            var intersections = SliceTriangle(v1, v2, v3, decimal.ToDouble(height));
             lineSegments.AddRange(intersections);
             
             /*// Create polygons from the intersection line segments using the “Even-Odd” for the FillRule parameter
@@ -127,21 +128,21 @@ public class Slicer
     }
 
 
-    public Dictionary<int, PathsD> SliceModel(ModelVisual3D model, double scale)
+    public Dictionary<int, PathsD> SliceModel(ModelVisual3D model, decimal scale)
     {
         var slicesDictionary = new Dictionary<int, PathsD>();
         
         // Loop through the model layer by layer height and slice each layer
-        double slicingHeight = 0.0;
+        decimal slicingHeight = 0.0m;
         
         // TODO: Are scale transformations applied here???
         
-        double modelHeight = model.Content.Bounds.SizeZ * scale;
+        double modelHeight = model.Content.Bounds.SizeZ * decimal.ToDouble(scale);
         int layer = 0;
         
         Console.WriteLine("in");
 
-        while (slicingHeight + tolerance < modelHeight)
+        while (decimal.ToDouble(slicingHeight + tolerance) < modelHeight)
         {
             PathsD? slice = SliceAndGeneratePaths(slicingHeight, model, scale);
             if (slice == null)
@@ -182,7 +183,7 @@ public class Slicer
         // This is equal to finding the points below / above the slicing plane
         // }
         
-        var sliceHeight = slicingPlaneHeight + tolerance;
+        var sliceHeight = slicingPlaneHeight + decimal.ToDouble(tolerance);
         var below = points.Where(v => v.Z < sliceHeight).ToArray();
         var above = points.Where(v => v.Z > sliceHeight).ToArray();
 
@@ -234,7 +235,7 @@ public class Slicer
     /**
     * Loop through all line segments and calculate distances between them to find the next segment
     */
-    private PathsD ProcessSegmentsWithClipper(List<PathD> segments, double height = 0)
+    private PathsD ProcessSegmentsWithClipper(List<PathD> segments)
     {
         var paths = new PathsD();
 
@@ -260,7 +261,7 @@ public class Slicer
         // to ensure contours are correctly identified as solids or holes
         var solution = new PathsD();
         ClipperD clipper = new ClipperD();
-        clipper.AddPaths(paths, PathType.Subject, false);
+        clipper.AddPaths(paths, PathType.Subject);
         clipper.AddPath(clip, PathType.Clip, true);
         clipper.Execute(ClipType.Union, Clipper2Lib.FillRule.EvenOdd, solution);
             
@@ -288,7 +289,7 @@ public class Slicer
     }
     
     
-        private List<PathD> testSlicingNaN(double height, ModelVisual3D model)
+        /*private List<PathD> testSlicingNaN(double height, ModelVisual3D model)
     {
         // Create a list of line segments from the plane-triangle intersections
         var lineSegments = new List<PathD>();
@@ -331,7 +332,7 @@ public class Slicer
             if (Math.Min(Math.Min(v1.Z, v2.Z), v3.Z) > height || Math.Max(Math.Max(v1.Z, v2.Z), v3.Z) < height) continue;
 
             var test = new PathD();
-            if (Math.Abs(v1.Z - v2.Z) < tolerance && Math.Abs(v1.Z - v3.Z) < tolerance && Math.Abs(v1.Z - height) < tolerance)
+            if (Math.Abs(v1.Z - v2.Z) < decimal.ToDouble(tolerance) && Math.Abs(v1.Z - v3.Z) < decimal.ToDouble(tolerance) && Math.Abs(v1.Z - height) < decimal.ToDouble(tolerance))
             {
                 Console.WriteLine("Test for NaN " + v1.ToString());
                 test = new PathD
@@ -398,6 +399,6 @@ public class Slicer
         }
         
         return lineSegments;
-    }
+    }*/
 
 }

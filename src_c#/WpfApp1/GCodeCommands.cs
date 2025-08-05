@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace WpfApp1;
 
-public class GCodeCommands
+public static class GCodeCommands
 {
     /**
     * Homes all axes
@@ -118,7 +118,7 @@ public class GCodeCommands
      */
     public static string ExtrudeToPositionCommand(double x, double y, double e, double feedRate)
     {
-        return $"G1 X{Formatter.FormatDouble(x)} Y{Formatter.FormatDouble(y)} F{Formatter.FormatDouble(feedRate)} E{e.ToString()}; Extrude to Position";
+        return $"G1 X{Formatter.FormatDouble(x)} Y{Formatter.FormatDouble(y)} F{Formatter.FormatDouble(feedRate)} E{e.ToString(CultureInfo.InvariantCulture)}; Extrude to Position";
     }
     
     /**
@@ -154,9 +154,9 @@ public class GCodeCommands
         return $"G1 X{Formatter.FormatDouble(x)} Y{Formatter.FormatDouble(y)} E{(Formatter.FormatDouble(-retractionDistance))} ; Retract and Move To Position";
     }
 
-    public static string MoveZCommand(double z)
+    public static string MoveZCommand(decimal z)
     {
-        return $"G0 Z{Formatter.FormatDouble(z)} ; Raise or lower Z position";
+        return $"G0 Z{Formatter.FormatDecimal(z)} ; Raise or lower Z position";
     }
 
     public static string PrintFinishedPositioningCommand()

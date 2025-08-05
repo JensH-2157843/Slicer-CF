@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Documents;
 using Clipper2Lib;
 using Microsoft.Win32;
+using static WpfApp1.Clean;
 
 namespace WpfApp1;
 
@@ -54,6 +55,7 @@ public class GCodeConverter
         return nearestIndex;
     }
     
+    
     /**
     * Makes sure the points in a path are ordered to reduce unecessary travel
     */
@@ -78,11 +80,210 @@ public class GCodeConverter
     {
         return Math.Sqrt(Math.Pow(p2.x - p1.x, 2) + Math.Pow(p2.y - p1.y, 2));
     }
+    
+    private bool IsSame(double p1, double p2, double epsilon = 1e-8)
+    {
+        return Math.Abs(p1 - p2) < epsilon;
+    }
+
+    private bool IsSamePoint(PointD p1, PointD p2)
+    {
+        return IsSame(p1.x, p2.x) && IsSame(p1.y, p2.y);
+    }
+
+    private (bool, bool) IsCloser(PathD p1, PathD p2)
+    {
+        PointD p1A = p1[p1.Count - 1];
+        PointD p1B = p1[0];
+        
+        PointD p2A = p2[p2.Count - 1];
+        PointD p2B = p2[0];
+        
+        double innerDistance1 = CalculateDistance(p1A,p1B);
+        double innerDistance2 = CalculateDistance(p2A,p2B);
+
+        double dist1 = 0;
+        double dist2 = 0;
+        bool needReversing2 = false;
+        
+
+        if (CalculateDistance(p1A, p2A) +  CalculateDistance(p1B, p2B) < CalculateDistance(p1A, p2B) + CalculateDistance(p1B, p2A))
+        {
+            dist1 = CalculateDistance(p1A, p2A);
+            dist2 = CalculateDistance(p1B, p2B);
+            needReversing2 = true;
+        }
+        else
+        {
+            dist1 = CalculateDistance(p1A, p2B);
+            dist2 = CalculateDistance(p1B, p2A);
+        }
+        
+        return (dist1 + dist2 < innerDistance1 + innerDistance2, needReversing2);
+
+
+    }
+
+    private PathsD CleanPaths(PathsD paths)
+    {
+        PathsD orderedPaths3 = new PathsD();
+        for (int i = 0; i < paths.Count; i++)
+        {
+            PathD pt = new PathD();
+            for (int j = 0; j < paths[i].Count; j++)
+            {
+                if (j == 0 || j == paths[i].Count - 1)
+                {
+                    pt.Add(paths[i][j]);
+                } else
+                {
+                    var prev = pt[^1];
+                    var next = paths[i][j + 1];
+                    var curr = paths[i][j];
+
+
+                    if (!(IsSame(prev.x, curr.x) && IsSame(curr.x, next.x)) && 
+                        !(IsSame(prev.y, curr.y) && IsSame(curr.y, next.y)))
+                    {
+                        pt.Add(curr);
+                    }
+                }
+            }
+            orderedPaths3.Add(pt);
+        }
+        
+        return orderedPaths3;
+    }
+    
+    private (PathsD,bool) JoinPathDistanceEnd(PathsD paths)
+    {
+        int i;
+        int j = 0;
+        var curr = paths[0];
+        bool hasJoined = false;
+        for (i = 0; i < paths.Count; i++)
+        {
+            curr = paths[i];
+            for (j = 0; j < paths.Count; j++)
+            {
+                if(i == j) {continue;}
+                
+                (bool iscloser, bool needsreversing) = IsCloser(curr, paths[j]);
+
+                if (iscloser)
+                { ;
+                    var merger = paths[j]; ;
+                    if (needsreversing)
+                    {
+                        merger.Reverse();
+                    }
+                    curr.AddRange(merger);
+                    hasJoined = true;
+                    break;
+                }
+            }
+
+            if (hasJoined) break;
+        }
+
+        if (hasJoined)
+        {
+            if (j > i)
+            {
+                paths.RemoveAt(j);
+                paths.RemoveAt(i);
+            }
+            else
+            {
+                paths.RemoveAt(i);
+                paths.RemoveAt(j);
+            }
+            paths.Add(curr);
+        }
+        return (paths, hasJoined);
+    }
+
+    private (PathsD,bool) JoinPathSamePoint(PathsD paths)
+    {
+        int i;
+        int j = 0;
+        var curr = paths[0];
+        bool hasJoined = false;
+        for (i = 0; i < paths.Count; i++)
+        {
+            curr = paths[i];
+            for (j = 0; j < paths.Count; j++)
+            {
+                if(i == j) {continue;}
+
+                if (IsSamePoint(curr[curr.Count()-1], paths[j][0]))
+                {
+                    curr.RemoveAt(curr.Count()-1);
+                    curr.AddRange(paths[j]);
+                    hasJoined = true;
+                    break;
+                }
+            }
+
+            if (hasJoined) break;
+        }
+
+        if (hasJoined)
+        {
+            if (j > i)
+            {
+                paths.RemoveAt(j);
+                paths.RemoveAt(i);
+            }
+            else
+            {
+                paths.RemoveAt(i);
+                paths.RemoveAt(j);
+            }
+            paths.Add(curr);
+        }
+        return (paths, hasJoined);
+    }
+
+    private PathsD JoinPaths(PathsD paths)
+    {
+        PathsD p = new PathsD();
+
+        foreach (PathD pd in paths)
+        {
+            pd.RemoveAt(pd.Count-1);
+            p.Add(pd);
+        }
+
+        while (p.Count > 1)
+        {
+            (p, var hasChanged) = JoinPathSamePoint(p);
+            if (!hasChanged) break;
+        }
+
+        while (p.Count > 1)
+        {
+            (p, var hasChanged) = JoinPathDistanceEnd(p);
+            if(!hasChanged) break;
+        }
+
+        foreach (PathD pd in p)
+        {
+            pd.Add(pd[pd.Count()-1]);
+        }
+        
+        return p;
+    }
 
     private PathsD OrderPaths(PathsD paths)
     {
-        PathsD orderedPaths = new PathsD();
+        // PathsD orderedPaths = new PathsD();
+        PathsD orderedPaths2 = new PathsD();
         PointD currentPosition = paths[0][0];
+        
+        PathD currentPath = new PathD();
+        currentPath.Add(currentPosition);
+        PointD startpoint = paths[0][0];
 
         while (paths.Count > 0)
         {
@@ -91,13 +292,51 @@ public class GCodeConverter
 
             // Order the points in a path to minimize travel distance
             PathD orderedPath = OrderPointsInPath(nearestPath, currentPosition);
+            
+            if(CalculateDistance(currentPosition,orderedPath[0]) > 0.00000001)
+            {
+                currentPath.Add(startpoint);
+                if (currentPath.Count > 3)
+                {
+                    orderedPaths2.Add(currentPath);
+                }
+                currentPath = new PathD();
+                currentPath.Add(orderedPath[0]);
+                startpoint = orderedPath[0];
+            }
 
-            orderedPaths.Add(orderedPath);
+            // orderedPaths.Add(orderedPath);
+            currentPath.Add(orderedPath[1]);
             currentPosition = orderedPath[^1];
             paths.RemoveAt(nearestPathIndex);
         }
 
-        return orderedPaths;
+        if (!IsPathClosed(currentPath))
+        {
+            currentPath.Add(startpoint);
+        }
+
+        if (currentPath.Count > 3)
+        {
+            orderedPaths2.Add(currentPath);
+        }
+
+        if (orderedPaths2.Count > 1)
+        {
+            orderedPaths2 = JoinPaths(orderedPaths2);
+        }
+        orderedPaths2 = CleanPaths(orderedPaths2);
+       
+        var test = Clipper.Union(orderedPaths2, FillRule.EvenOdd);
+        //test = Clean.CleanPolygons(test);
+        foreach (var i in test)
+        {
+            if (i.Count() != 0)
+            {
+                i.Add(i[0]);
+            }
+        }
+        return test;
     }
     
     /**
@@ -119,6 +358,7 @@ public class GCodeConverter
     
     private List<string> GenerateGCodeFromSlice(PathsD slice, double xOffset, double yOffset, int layer)
     {
+        Console.WriteLine(layer); 
         List<string> gcode = new List<string>();
         double extrusionAmount = 0.0;
         

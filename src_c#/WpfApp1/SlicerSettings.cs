@@ -13,18 +13,19 @@ public class SlicerSettings : INotifyPropertyChanged
     }
     
     // Default settings, can be overwritten
-    public double LayerHeight = 0.20; // mm
-    public double NozzleDiameter = 0.4; // mm
+    public decimal LayerHeight = 0.20m; // mm
+    public decimal NozzleDiameter = 0.4m; // mm
     
     public int NozzleTemperature = 200; // degrees celcius
     public int BedTemperature = 35; // degrees celcius
 
-    public double FilamentDiameter = 1.75; // mm
-    public double ExtrusionRate = 0.05;
+    public decimal FilamentDiameter = 1.75m; // mm
+    public double  FilamentArea => Math.PI * Math.Pow(decimal.ToDouble(FilamentDiameter) / 2, 2);
+    public decimal ExtrusionRate = 0.05m;
 
-    public double BedWidth = 220; // mm
-    public double BedDepth = 220; // mm
-    public double BedHeight = 250; // mm
+    public decimal BedWidth = 220m; // mm
+    public decimal BedDepth = 220m; // mm
+    public decimal BedHeight = 250m; // mm
     
     public int TravelSpeed = 50; // mm/s
     public int PrintSpeed = 50; // mm/s
@@ -34,12 +35,12 @@ public class SlicerSettings : INotifyPropertyChanged
      * Following function can be used to update all setings at once
      */
     public void SetSlicerSettings(
-        double layerHeight, 
-        double nozzleDiameter, 
+        decimal layerHeight, 
+        decimal nozzleDiameter, 
         int nozzleTemperature, 
         int bedTemperature,
-        double filamentDiameter,
-        double extrusionRate)
+        decimal filamentDiameter,
+        decimal extrusionRate)
     {
         this.LayerHeight = layerHeight;
         this.NozzleDiameter = nozzleDiameter;

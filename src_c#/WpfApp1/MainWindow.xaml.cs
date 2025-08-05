@@ -26,10 +26,10 @@ public partial class MainWindow : Window
     private STLLoader? _stlLoader;
     private GCodeConverter? _gcodeConverter;
     private Gcodecoverter? _gcodeConverter2;
-    private double _slicingPlaneHeight;
+    private decimal _slicingPlaneHeight;
     private int _selectedSlicingLayer = 0;
-    private double _scaleFactor = 1.0;
-    private double _nozzleSize = 0.4;
+    private decimal _scaleFactor = 1.0m;
+    private decimal _nozzleSize = 0.4m;
 
     private Dictionary<int, PathsD> _slicesDictionary = new Dictionary<int, PathsD>();
     
@@ -100,10 +100,10 @@ public partial class MainWindow : Window
 
         // Add a flat square at the initial slicingPlaneHeight
         var points = new Point3DCollection();
-        points.Add(new Point3D(-planeSize / 2, -planeSize / 2, _slicingPlaneHeight));
-        points.Add(new Point3D(planeSize / 2, -planeSize / 2, _slicingPlaneHeight));
-        points.Add(new Point3D(planeSize / 2, planeSize / 2, _slicingPlaneHeight));
-        points.Add(new Point3D(-planeSize / 2, planeSize / 2, _slicingPlaneHeight));
+        points.Add(new Point3D(-planeSize / 2, -planeSize / 2, decimal.ToDouble(_slicingPlaneHeight)));
+        points.Add(new Point3D(planeSize / 2, -planeSize / 2, decimal.ToDouble(_slicingPlaneHeight)));
+        points.Add(new Point3D(planeSize / 2, planeSize / 2, decimal.ToDouble(_slicingPlaneHeight)));
+        points.Add(new Point3D(-planeSize / 2, planeSize / 2, decimal.ToDouble(_slicingPlaneHeight)));
         
         planeMesh.AddPolygon(points);
 
@@ -167,7 +167,7 @@ public partial class MainWindow : Window
                 DisableSlicingLayersSlider();
                 // Reset scale to 1.0
                 ScaleSlider.Value = 1.0;
-                _scaleFactor = 1.0;
+                _scaleFactor = 1.0m;
             }
              
             // Create new 3D object to place in viewport
@@ -374,7 +374,7 @@ public partial class MainWindow : Window
         SlicingPlaneSlider.IsEnabled = true;
     }*/
 
-    private void OnSlicingPlaneHeightChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    /*private void OnSlicingPlaneHeightChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         _slicingPlaneHeight = e.NewValue;
         SliderValueTextBlock.Text = $"{_slicingPlaneHeight:F2} mm";
@@ -386,7 +386,7 @@ public partial class MainWindow : Window
             // VisualizeSlicingPlane(paths);
             UpdateSlicingPlanePosition();
         }
-    }
+    }*/
 
     private void OnSlicingLayerChange(object sender, RoutedEventArgs e)
     {
@@ -422,7 +422,7 @@ public partial class MainWindow : Window
             }
             
             // Update the plane's position using a transform
-            _slicingPlane.Transform = new TranslateTransform3D(0, 0, _slicingPlaneHeight);
+            _slicingPlane.Transform = new TranslateTransform3D(0, 0, decimal.ToDouble(_slicingPlaneHeight));
         }
     }
     
@@ -482,7 +482,7 @@ public partial class MainWindow : Window
         double factor = Math.Min(scaleX, scaleY);
         // double paddingOffsetFactor = 0.9;
         
-        return (x * factor) / _scaleFactor;
+        return (x * factor) / decimal.ToDouble(_scaleFactor);
         // return ((x * factor) / _scaleFactor)*paddingOffsetFactor;
         // return x * 2 // scale to canvas for relative size to print bed
     }
@@ -498,7 +498,7 @@ public partial class MainWindow : Window
         double factor = Math.Min(scaleX, scaleY);
         // double paddingOffsetFactor = 0.9;
         
-        return (y * factor) / _scaleFactor;
+        return (y * factor) / decimal.ToDouble(_scaleFactor);
 
         // return ((y * factor) / _scaleFactor)*paddingOffsetFactor;
         // return x * 2 // scale to canvas for relative size to print bed
@@ -507,7 +507,7 @@ public partial class MainWindow : Window
     private void MyComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if(((ComboBox) sender).SelectedItem.ToString() == null) return;
-        _nozzleSize = Convert.ToDouble(((ComboBox) sender).SelectedItem.ToString()!.Substring(38,3));
+        _nozzleSize = Convert.ToDecimal(((ComboBox) sender).SelectedItem.ToString()!.Substring(38,3));
     }
     
     private void OnScaleSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -517,7 +517,7 @@ public partial class MainWindow : Window
             double scaleValue = e.NewValue;
             ScaleValueTextBlock.Text = $"Scale: {scaleValue:F1}";
 
-            this._scaleFactor = scaleValue;
+            this._scaleFactor = Convert.ToDecimal(scaleValue);
 
             // Update the scale of the STL model in the helix viewport
             ScaleModel(scaleValue);
@@ -584,21 +584,21 @@ public partial class MainWindow : Window
     private bool ExceedsBedDimensions(ModelVisual3D model)
     {
         // Check if the width of the model is bigger than the bed (220)
-        if (model.Content.Bounds.SizeX > _slicer?.Settings().BedWidth)
+        if (_slicer != null && model.Content.Bounds.SizeX > decimal.ToDouble(_slicer.Settings().BedWidth))
         {
             Console.WriteLine("WARNING! The model has exceeded the bed dimensions.");
             return true;
         }
 
         // Check if the depth of the model is bigger than the bed (220)
-        if (model.Content.Bounds.SizeY > _slicer?.Settings().BedDepth)
+        if (_slicer != null && model.Content.Bounds.SizeY > decimal.ToDouble(_slicer.Settings().BedDepth))
         {
             Console.WriteLine("WARNING! The model has exceeded the bed dimensions.");
             return true;
         }
 
         // Check if the height of the model is bigger than the bed (250)
-        if (model.Content.Bounds.SizeZ > _slicer?.Settings().BedHeight)
+        if (_slicer != null && model.Content.Bounds.SizeZ > decimal.ToDouble(_slicer.Settings().BedHeight))
         {
             Console.WriteLine("WARNING! The model has exceeded the bed dimensions.");
             return true;

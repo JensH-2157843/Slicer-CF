@@ -24,5 +24,15 @@ public class Formatter
     {
         return double.Parse(text, CultureInfo.InvariantCulture);
     }
+    
+    public static decimal FormatStringDecimal(string text)
+    {
+        return decimal.Parse(text, CultureInfo.InvariantCulture);
+    }
+
+    public static string FormatDecimal(decimal value)
+    {
+        return value.ToString(CultureInfo.InvariantCulture);
+    }
 
 }
