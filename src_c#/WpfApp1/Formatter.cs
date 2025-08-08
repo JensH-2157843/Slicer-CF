@@ -15,7 +15,7 @@ public class Formatter
         return value.ToString(CultureInfo.InvariantCulture);
     }
 
-    public static int FormatSringToInt(string text)
+    public static int FormatStringToInt(string text)
     {
         return int.Parse(text, CultureInfo.InvariantCulture);
     }

@@ -30,6 +30,8 @@ public class SlicerSettings : INotifyPropertyChanged
     public int TravelSpeed = 50; // mm/s
     public int PrintSpeed = 50; // mm/s
 
+    public int NumberShells = 1;
+
     
     /**
      * Following function can be used to update all setings at once
@@ -40,7 +42,8 @@ public class SlicerSettings : INotifyPropertyChanged
         int nozzleTemperature, 
         int bedTemperature,
         decimal filamentDiameter,
-        decimal extrusionRate)
+        decimal extrusionRate,
+        int NShells)
     {
         this.LayerHeight = layerHeight;
         this.NozzleDiameter = nozzleDiameter;
@@ -48,6 +51,7 @@ public class SlicerSettings : INotifyPropertyChanged
         this.BedTemperature = bedTemperature;
         this.FilamentDiameter = filamentDiameter;
         this.ExtrusionRate = extrusionRate;
+        this.NumberShells = NShells;
         
         // bed width, depth and height
         // support

@@ -347,6 +347,58 @@ public class GCodeConverter
         // return first.x == last.x && first.y == last.y;
         return Math.Abs(first.x - last.x) < epsilon && Math.Abs(first.y - last.y) < epsilon;
     }
+
+    private (List<string>, double) GenerateGCode(PathsD paths, double extrusionAmount, double xOffset, double yOffset, double layer, bool needsToPrintFirst = true, bool isPerimeter = false)
+    {
+        List<string> gcode = new List<string>();
+        PointD prev = new PointD();
+        PointD start = paths[0][0];
+        bool isFirst = true;
+        double tolerance = 0.000001;
+
+        foreach (var path in paths)
+        {
+            if (path.Count < 2) continue; // Skip invalid paths
+
+            // Move to the start of the path
+            PointD startPoint = path[0];
+            if (!(Math.Abs(prev.x - startPoint.x) < tolerance && Math.Abs(startPoint.y - prev.y) < tolerance))
+            {
+                if (!(Math.Abs(prev.x - start.x) < tolerance && Math.Abs(start.y - prev.y) < tolerance) &&
+                    (!isFirst || (layer != 0 && needsToPrintFirst)))
+                {
+                    needsToPrintFirst = true;
+                    double closingExtrusion = GCodeHelper.CalculateExtrusion(prev, start, settings, isPerimeter);
+                    extrusionAmount += closingExtrusion;
+                    gcode.Add(GCodeCommands.ExtrudeToPositionCommand(start.x + xOffset, start.y + yOffset,
+                        extrusionAmount,
+                        500));
+                }
+                else isFirst = false;
+
+                gcode.Add(GCodeCommands.MoveToPositionCommand(startPoint.x + xOffset, startPoint.y + yOffset, 1500));
+                start = startPoint;
+
+            }
+
+            // Extrude along the path
+            for (int i = 1; i < path.Count; i++)
+            {
+                PointD previousPoint = path[i - 1];
+                PointD currentPoint = path[i];
+
+                // double distance = CalculateDistance(previousPoint, currentPoint);
+                double extrusion = GCodeHelper.CalculateExtrusion(previousPoint, currentPoint, settings, isPerimeter);
+                extrusionAmount += extrusion;
+
+                gcode.Add(GCodeCommands.ExtrudeToPositionCommand(currentPoint.x + xOffset, currentPoint.y + yOffset,
+                    extrusionAmount,
+                    500));
+                prev = currentPoint;
+            }
+        }
+        return (gcode, extrusionAmount);
+    }
     
     private List<string> GenerateGCodeFromSlice(PathsD slice, double xOffset, double yOffset, int layer)
     {
@@ -356,49 +408,30 @@ public class GCodeConverter
         
         // Order the paths such that extruder makes least amount of unessecary travel
         PathsD orderedPaths = OrderPaths(slice);
-        // PathsD orderedPaths = slice;
-        PointD prev = new PointD();
-        PointD start = orderedPaths[0][0];
-        bool isFirst = true;
-        double tolerance = 0.000001;
-
         
-        // Generate G-code for each path
-        foreach (var path in orderedPaths)
+        List<PathsD> Shells = new List<PathsD>();
+
+        for (int i = 0; i < settings.NumberShells; ++i)
         {
-            if (path.Count < 2) continue; // Skip invalid paths
-
-            // Move to the start of the path
-            PointD startPoint = path[0];
-            if(! (Math.Abs(prev.x - startPoint.x) < tolerance && Math.Abs(startPoint.y - prev.y) < tolerance))
+            PathsD p = Clipper.InflatePaths(orderedPaths,-0.3 - 0.4 * i,JoinType.Square,EndType.Polygon);
+            p = Clipper.SimplifyPaths(p, 0.025);
+            foreach (PathD path in p)
             {
-                if(!(Math.Abs(prev.x - start.x) < tolerance && Math.Abs(start.y - prev.y) < tolerance) && (!isFirst || layer != 0))
-                {
-                    double closingExtrusion = GCodeHelper.CalculateExtrusion(prev, start, settings);
-                    extrusionAmount += closingExtrusion;
-                    gcode.Add(GCodeCommands.ExtrudeToPositionCommand(start.x + xOffset, start.y + yOffset,
-                        extrusionAmount,
-                        500));
-                } else isFirst = false;
-                gcode.Add(GCodeCommands.MoveToPositionCommand(startPoint.x + xOffset, startPoint.y + yOffset, 1500));
-                start = startPoint;
-                
+                path.Add(path[0]);
             }
-            // Extrude along the path
-            for (int i = 1; i < path.Count; i++)
-            {
-                PointD previousPoint = path[i - 1];
-                PointD currentPoint = path[i];
+            Shells.Add(p);
+        }
+        
 
-                // double distance = CalculateDistance(previousPoint, currentPoint);
-                double extrusion = GCodeHelper.CalculateExtrusion(previousPoint, currentPoint, settings);
-                extrusionAmount += extrusion;
 
-                gcode.Add(GCodeCommands.ExtrudeToPositionCommand(currentPoint.x + xOffset, currentPoint.y + yOffset, extrusionAmount,
-                    500));
-                prev = currentPoint;
-            }
-            
+        var (gc, eA) = GenerateGCode(orderedPaths, extrusionAmount, xOffset, yOffset, layer,true,true);
+        gcode.AddRange(gc);
+        extrusionAmount += eA;
+        foreach (var shell in Shells)
+        {
+            (gc , eA) = GenerateGCode(shell, extrusionAmount, xOffset, yOffset, layer, false);
+            gcode.AddRange(gc);
+            extrusionAmount += eA;
         }
         
         //Console.WriteLine(counter);

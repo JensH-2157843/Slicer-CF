@@ -8,10 +8,14 @@ public class GCodeHelper
      * Calculates the extrusion amount required for moving between two points.
      * TODO: Check if this is the correct extrusion
      */
-    public static double CalculateExtrusion(PointD p1, PointD p2, SlicerSettings slicerSettings)
+    public static double CalculateExtrusion(PointD p1, PointD p2, SlicerSettings slicerSettings, bool isPerimeter = false)
     {
         // Fetch slicer settings
         decimal nozzleSize = slicerSettings.NozzleDiameter;
+        if (isPerimeter)
+        {
+            nozzleSize /= 2;
+        }
         decimal layerHeight = slicerSettings.LayerHeight;
         double filamentArea = slicerSettings.FilamentArea;
 

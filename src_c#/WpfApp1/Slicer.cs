@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
@@ -166,6 +167,10 @@ public class Slicer
      * Slice triangle using Direct Plane-Triangle Intersection
      * given the slicing plane height: slicingPlaneHeight
      */
+    [SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH", MessageId = "type: System.Windows.Media.Media3D.Point3D[]; size: 200MB")]
+    [SuppressMessage("ReSharper.DPA", "DPA0004: Closure object allocation", MessageId = "size: 54MB")]
+    [SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH", MessageId = "type: ArrayWhereIterator`1[System.Windows.Media.Media3D.Point3D]; size: 133MB")]
+    [SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH", MessageId = "type: System.Func`2[System.Windows.Media.Media3D.Point3D,System.Boolean]; size: 122MB")]
     private PathsD SliceTriangle(Point3D p1, Point3D p2, Point3D p3, double slicingPlaneHeight){
         var points = new[] { p1, p2, p3 };
         var lineSegments = new PathsD();

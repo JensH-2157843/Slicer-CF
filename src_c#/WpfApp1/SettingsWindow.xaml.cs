@@ -25,7 +25,8 @@ public partial class SettingsWindow : Window
             NozzleTemperature = settings.NozzleTemperature,
             BedTemperature = settings.BedTemperature,
             FilamentDiameter = settings.FilamentDiameter,
-            NozzleDiameter = settings.NozzleDiameter
+            NozzleDiameter = settings.NozzleDiameter,
+            NumberShells = settings.NumberShells,
         };
         // DataContext = UpdatedSettings;
         // Binding didnt work properly so removed this
@@ -38,15 +39,17 @@ public partial class SettingsWindow : Window
         bedTemp.Text = Formatter.FormatInt(_settings.BedTemperature);
         filamentDiam.Text = Formatter.FormatDecimal(_settings.FilamentDiameter);
         nozzleDiam.Text = Formatter.FormatDecimal(_settings.NozzleDiameter);
+        numberShell.Text = Formatter.FormatInt(_settings.NumberShells);
     }
 
     private void UpdateAllValues()
     {
         UpdatedSettings.LayerHeight = Formatter.FormatStringDecimal(layerHeight.Text);
-        UpdatedSettings.NozzleTemperature = Formatter.FormatSringToInt(extruderTemp.Text);
-        UpdatedSettings.BedTemperature = Formatter.FormatSringToInt(bedTemp.Text);
+        UpdatedSettings.NozzleTemperature = Formatter.FormatStringToInt(extruderTemp.Text);
+        UpdatedSettings.BedTemperature = Formatter.FormatStringToInt(bedTemp.Text);
         UpdatedSettings.FilamentDiameter = Formatter.FormatStringDecimal(filamentDiam.Text);
         UpdatedSettings.NozzleDiameter = Formatter.FormatStringDecimal(nozzleDiam.Text);
+        UpdatedSettings.NumberShells = Formatter.FormatStringToInt(numberShell.Text);
     }
     
     private void OnSaveSettingsClick(object sender, RoutedEventArgs e)

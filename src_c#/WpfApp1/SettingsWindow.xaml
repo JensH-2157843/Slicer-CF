@@ -19,6 +19,7 @@
             <RowDefinition Height="50" />
             <RowDefinition Height="50" />
             <RowDefinition Height="50" />
+            <RowDefinition Height="50" />
             <RowDefinition Height="90" />
         </Grid.RowDefinitions>
         
@@ -56,13 +57,17 @@
             Nozzle Diameter (mm):
         </TextBlock>
         <TextBox x:Name="nozzleDiam" VerticalAlignment="Center" PreviewTextInput="NumericOnly_PreviewTextInput" Grid.Row="5" Grid.Column="1" Height="25" Width="75"/>
-
+        
+        <TextBlock HorizontalAlignment="Left" Style="{StaticResource buttonText}" VerticalAlignment="Center" Grid.Row="6" Grid.Column="0">
+            Number of Shells:
+        </TextBlock>
+        <TextBox x:Name="numberShell" VerticalAlignment="Center" PreviewTextInput="NumericOnly_PreviewTextInput" Grid.Row="6" Grid.Column="1" Height="25" Width="75"/>
         
         <!-- <Button Content="Save" Grid.Row="9" Grid.Column="1" HorizontalAlignment="Right" Margin="5" Width="80" Click="SaveButton_Click"/> -->
 
         
-        <Button Margin="0 15" Style="{StaticResource menuButtonGray}" Grid.Row="6" Grid.Column="0" Click="OnCancelClick" Content="Cancel"/>
-        <Button Margin="0 15" Style="{StaticResource menuButtonDark}" Grid.Row="6" Grid.Column="1" Click="OnSaveSettingsClick" Content="Save settings"/>
+        <Button Margin="0 15" Style="{StaticResource menuButtonGray}" Grid.Row="7" Grid.Column="0" Click="OnCancelClick" Content="Cancel"/>
+        <Button Margin="0 15" Style="{StaticResource menuButtonDark}" Grid.Row="7" Grid.Column="1" Click="OnSaveSettingsClick" Content="Save settings"/>
         
     </Grid>
 </Window>
