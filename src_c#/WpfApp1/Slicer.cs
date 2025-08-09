@@ -129,9 +129,9 @@ public class Slicer
     }
 
 
-    public Dictionary<int, PathsD> SliceModel(ModelVisual3D model, decimal scale)
+    public Dictionary<int, Dictionary<string, PathsD>> SliceModel(ModelVisual3D model, decimal scale)
     {
-        var slicesDictionary = new Dictionary<int, PathsD>();
+        var slicesDictionary = new Dictionary<int, Dictionary<string, PathsD>>();
         
         // Loop through the model layer by layer height and slice each layer
         decimal slicingHeight = 0.0m;
@@ -146,12 +146,27 @@ public class Slicer
         while (decimal.ToDouble(slicingHeight + tolerance) < modelHeight)
         {
             PathsD? slice = SliceAndGeneratePaths(slicingHeight, model, scale);
+            Dictionary<String, PathsD> New_layer = new Dictionary<string, PathsD>();
             if (slice == null)
             {
                 Console.WriteLine("Warning! Empty slice.");
-                slice = new PathsD();
             }
-            slicesDictionary.Add(layer, slice);
+            else
+            {
+                var Oslice = GCodeConverter.OrderPaths(slice);
+                New_layer.Add("PERIMETER", Oslice);
+                for (int i = 0; i < settings.NumberShells; ++i)
+                {
+                    PathsD p = Clipper.InflatePaths(Oslice,-0.3 - 0.4 * i,JoinType.Square,EndType.Polygon);
+                    p = Clipper.SimplifyPaths(p, 0.025);
+                    foreach (PathD path in p)
+                    {
+                        path.Add(path[0]);
+                    }
+                    New_layer.Add($"SHELL{i}", p);
+                }
+            }
+            slicesDictionary.Add(layer, New_layer);
             
             // Increase slicing height by layer height
             slicingHeight += settings.LayerHeight;

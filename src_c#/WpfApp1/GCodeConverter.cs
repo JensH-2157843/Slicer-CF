@@ -81,17 +81,17 @@ public class GCodeConverter
         return Math.Sqrt(Math.Pow(p2.x - p1.x, 2) + Math.Pow(p2.y - p1.y, 2));
     }
     
-    private bool IsSame(double p1, double p2, double epsilon = 1e-8)
+    private static bool IsSame(double p1, double p2, double epsilon = 1e-8)
     {
         return Math.Abs(p1 - p2) < epsilon;
     }
 
-    private bool IsSamePoint(PointD p1, PointD p2)
+    private static bool IsSamePoint(PointD p1, PointD p2)
     {
         return IsSame(p1.x, p2.x) && IsSame(p1.y, p2.y);
     }
 
-    private (bool, bool) IsCloser(PathD p1, PathD p2)
+    private static (bool, bool) IsCloser(PathD p1, PathD p2)
     {
         PointD p1A = p1[p1.Count - 1];
         PointD p1B = p1[0];
@@ -124,7 +124,7 @@ public class GCodeConverter
 
     }
 
-    private PathsD CleanPaths(PathsD paths)
+    private static PathsD CleanPaths(PathsD paths)
     {
         PathsD orderedPaths3 = new PathsD();
         for (int i = 0; i < paths.Count; i++)
@@ -155,7 +155,7 @@ public class GCodeConverter
         return orderedPaths3;
     }
     
-    private (PathsD,bool) JoinPathDistanceEnd(PathsD paths)
+    private static (PathsD,bool) JoinPathDistanceEnd(PathsD paths)
     {
         int i;
         int j = 0;
@@ -203,7 +203,7 @@ public class GCodeConverter
         return (paths, hasJoined);
     }
 
-    private (PathsD,bool) JoinPathSamePoint(PathsD paths)
+    private static (PathsD,bool) JoinPathSamePoint(PathsD paths)
     {
         int i;
         int j = 0;
@@ -245,7 +245,7 @@ public class GCodeConverter
         return (paths, hasJoined);
     }
 
-    private PathsD JoinPaths(PathsD paths)
+    private static PathsD JoinPaths(PathsD paths)
     {
         PathsD p = new PathsD();
 
@@ -275,7 +275,7 @@ public class GCodeConverter
         return p;
     }
 
-    private PathsD OrderPaths(PathsD paths)
+    public static PathsD OrderPaths(PathsD paths)
     {
         PathsD orderedPaths2 = new PathsD();
         PointD currentPosition = paths[0][0];
@@ -400,36 +400,20 @@ public class GCodeConverter
         return (gcode, extrusionAmount);
     }
     
-    private List<string> GenerateGCodeFromSlice(PathsD slice, double xOffset, double yOffset, int layer)
+    private List<string> GenerateGCodeFromSlice(Dictionary<string, PathsD> slice, double xOffset, double yOffset, int layer)
     {
         Console.WriteLine(layer); 
         List<string> gcode = new List<string>();
         double extrusionAmount = 0.0;
         
-        // Order the paths such that extruder makes least amount of unessecary travel
-        PathsD orderedPaths = OrderPaths(slice);
-        
-        List<PathsD> Shells = new List<PathsD>();
-
-        for (int i = 0; i < settings.NumberShells; ++i)
-        {
-            PathsD p = Clipper.InflatePaths(orderedPaths,-0.3 - 0.4 * i,JoinType.Square,EndType.Polygon);
-            p = Clipper.SimplifyPaths(p, 0.025);
-            foreach (PathD path in p)
-            {
-                path.Add(path[0]);
-            }
-            Shells.Add(p);
-        }
-        
-
-
-        var (gc, eA) = GenerateGCode(orderedPaths, extrusionAmount, xOffset, yOffset, layer,true,true);
+        gcode.Add($";PERIMETER");
+        var (gc, eA) = GenerateGCode(slice["PERIMETER"], extrusionAmount, xOffset, yOffset, layer,true,true);
         gcode.AddRange(gc);
         extrusionAmount += eA;
-        foreach (var shell in Shells)
+        for (int i = 0; i < settings.NumberShells; ++i)
         {
-            (gc , eA) = GenerateGCode(shell, extrusionAmount, xOffset, yOffset, layer, false);
+            gc.Add($";SHELL {i}");
+            (gc , eA) = GenerateGCode(slice[$"SHELL{i}"], extrusionAmount, xOffset, yOffset, layer, false);
             gcode.AddRange(gc);
             extrusionAmount += eA;
         }
@@ -442,7 +426,7 @@ public class GCodeConverter
     /**
      * Takes a single slice and produces gcode to print the given layer
      */
-    private List<string> SliceToGCode(PathsD slice, int layer, double? xOffset = null, double? yOffset = null)
+    private List<string> SliceToGCode(Dictionary<string, PathsD> slice, int layer, double? xOffset = null, double? yOffset = null)
     {
         if (slice.Count == 0)
         {
@@ -455,7 +439,7 @@ public class GCodeConverter
 
         if (xOffset == null && yOffset == null)
         {
-            (xOffset, yOffset) = GCodeHelper.GetXAndYOffsetsToCenter(slice, settings);
+            (xOffset, yOffset) = GCodeHelper.GetXAndYOffsetsToCenter(slice["PERIMETER"], settings);
         }
 
         var tempcode = GenerateGCodeFromSlice(slice, xOffset.Value, yOffset.Value, layer);
@@ -478,14 +462,16 @@ public class GCodeConverter
 
         // Reset extruder
         gcodeCommandList.Add(GCodeCommands.ResetExtruderCommand());
-        
+        gcodeCommandList.Add(";HELPER");
         // Move the nozzle to coordinates (X=0.1, Y=20, Z=0.3)
         // at a speed of 5000 mm/min to prepare for the first print stroke.
-        gcodeCommandList.Add(GCodeCommands.MoveToPositionCommand(startPoint.x, endPoint.y, zHeight, 5000));
+        gcodeCommandList.Add(GCodeCommands.MoveToPositionCommand(startPoint.x, startPoint.y, zHeight, 5000));
         
         // Moves the nozzle along the Y-axis (from Y=20 to Y=200) at Z=0.3 mm
         // and a speed of 1500 mm/min while extruding 15 mm of filament.
-        gcodeCommandList.Add(GCodeCommands.ExtrudeToPositionCommand(startPoint.x, endPoint.y, zHeight, extrusionAmount, 1500));
+        gcodeCommandList.Add(GCodeCommands.ExtrudeToPositionCommand(endPoint.x, endPoint.y, zHeight, extrusionAmount, 1500));
+        gcodeCommandList.Add(GCodeCommands.ExtrudeToPositionCommand(startPoint.x, startPoint.y, zHeight, extrusionAmount, 1500));        
+
         
         return gcodeCommandList;;
     }
@@ -565,7 +551,7 @@ public class GCodeConverter
         return gcodeCommandList;
     }
     
-    public void ExportGCodeForSingleSlice(PathsD slice, int layer)
+    public void ExportGCodeForSingleSlice(Dictionary<string, PathsD> slice, int layer)
     {
         List<string> gcodeCommandList = new List<string>();
         
@@ -592,25 +578,12 @@ public class GCodeConverter
             File.WriteAllLines(saveFileDialog.FileName, gcodeCommandList);
         }
     }
-
-
-    private List<string> GetTransitionToNextLayerCommands(PathsD currentLayer, PathsD nextLayer)
-    {
-        List<string> gcodeCommandList = new List<string>();
-        
-        // Move up by layerheight
-        gcodeCommandList.Add(GCodeCommands.MoveZCommand(settings.LayerHeight));
-        
-        // TODO: what else?
-        
-        return gcodeCommandList;
-    }
     
     /**
      * Generate GCode for all layers in slices
      * with begin print and end print sequence
      */
-    public void ExportGCode(Dictionary<int, PathsD> slices)
+    public void ExportGCode(Dictionary<int, Dictionary<string, PathsD>> slices)
     {
         if (slices.Count == 0)
         {
@@ -632,7 +605,7 @@ public class GCodeConverter
         double yOffset = 0;
         foreach (var kvp in slices)
         {
-            PathsD slice = kvp.Value;
+            PathsD slice = kvp.Value["PERIMETER"];
             
            (var tempX, var tempY) = GCodeHelper.GetXAndYOffsetsToCenter(slice, settings);
            xOffset = Double.Max(xOffset, tempX);
@@ -643,7 +616,7 @@ public class GCodeConverter
         foreach (var kvp in slices)
         {
             int layer = kvp.Key;
-            PathsD slice = kvp.Value;
+            Dictionary<string, PathsD> slice = kvp.Value;
             
             List<string> generatedGCode = SliceToGCode(slice, layer, xOffset, yOffset);
             
@@ -658,13 +631,10 @@ public class GCodeConverter
             }
             else
             {
-                PathsD nextLayer = slices[layer+1];
-                
-                // Transition to next layer
-                GetTransitionToNextLayerCommands(slice, nextLayer);
+                gcodeCommandList.Add(GCodeCommands.MoveZCommand(settings.LayerHeight));
             }
             
-            // Continue untill all layers are sliced
+            // Continue until all layers are sliced
         }
         
         AddPrintDoneCommands();

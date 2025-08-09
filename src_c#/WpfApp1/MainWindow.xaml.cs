@@ -31,7 +31,7 @@ public partial class MainWindow : Window
     private decimal _scaleFactor = 1.0m;
     private decimal _nozzleSize = 0.4m;
 
-    private Dictionary<int, PathsD> _slicesDictionary = new Dictionary<int, PathsD>();
+    private Dictionary<int, Dictionary<string, PathsD>> _slicesDictionary = new Dictionary<int, Dictionary<string, PathsD>>();
     
     public MainWindow()
     {
@@ -133,7 +133,7 @@ public partial class MainWindow : Window
         _slicer.UpdateSlicerSettings(updatedSettings);
         
         // Update in GCodeconverter
-        _gcodeConverter.UpdateSlicerSettings(updatedSettings); 
+        _slicesDictionary = _slicer.SliceModel(_visualModel, _scaleFactor);
     }
 
 
@@ -182,7 +182,7 @@ public partial class MainWindow : Window
         }
     }
     
-    private void OnClickSlice(object sender, RoutedEventArgs e)
+   /* private void OnClickSlice(object sender, RoutedEventArgs e)
     {
         // Check if an STL model is loaded
         if (_visualModel == null || _visualModel.Content == null)
@@ -205,7 +205,7 @@ public partial class MainWindow : Window
                 // Nothing to slice
                 return;
             }
-            */
+            /
             
             var paths = _slicer?.SliceAndGeneratePaths(_slicingPlaneHeight, _visualModel, _scaleFactor);
 
@@ -237,7 +237,7 @@ public partial class MainWindow : Window
         // // Hide modal and enable buttons again
         // LoadingModal.Visibility = Visibility.Collapsed;
         // EnableUI();
-    }
+    }*/
 
     /**
      * Used for testing. Not needed in final application.
@@ -260,7 +260,7 @@ public partial class MainWindow : Window
         _gcodeConverter?.ExportGCode(_slicesDictionary);
     }
     
-    private void UpdateSlicingLayersSlider(Dictionary<int, PathsD> slicesDictionary, int selectedSlicingLayer = 0)
+    private void UpdateSlicingLayersSlider(Dictionary<int, Dictionary<string, PathsD>> slicesDictionary, int selectedSlicingLayer = 0)
     {
         // _selectedSlicingLayer
         
@@ -311,7 +311,7 @@ public partial class MainWindow : Window
     private void OnClickSliceModel(object sender, RoutedEventArgs e)
     {
         // Reset slicesDictionary
-        _slicesDictionary.Clear();
+        //_slicesDictionary.Clear();
         
         // Check if an STL model is loaded
         if (_visualModel == null || _visualModel.Content == null)
@@ -395,7 +395,8 @@ public partial class MainWindow : Window
             var selLayer = (int)SlicingPlaneSlider.Value;
             _selectedSlicingLayer = selLayer;
             
-            Console.WriteLine($"Selected Slicing Layer: {_selectedSlicingLayer}");
+            SliderValueTextBlock.Text = $"{_selectedSlicingLayer + 1} / {_slicesDictionary.Count}";
+            SliderValueTextBlock.Foreground = new SolidColorBrush(Colors.Black);
         
             UpdateSlicingLayersSlider(_slicesDictionary, _selectedSlicingLayer);
             UpdateSlicingPlanePosition();
@@ -426,7 +427,7 @@ public partial class MainWindow : Window
         }
     }
     
-    private void VisualizeSlicingPlane(PathsD paths)
+    private void VisualizeSlicingPlane(Dictionary<string, PathsD> paths)
     {
         // Clear current canvas
         SliceCanvas.Children.Clear();
@@ -440,15 +441,37 @@ public partial class MainWindow : Window
         // Show the paths on the canvas
         foreach (var path in paths)
         {
-            var polygon = new Polyline
+            var key = path.Key;
+            var value = path.Value;
+            var strokeTick = 0;
+            var stroke = Brushes.White;
+            
+            if (key == "PERIMETER")
             {
-                Stroke = Brushes.Black,
-                StrokeThickness = 1
-            };
+                stroke = Brushes.Blue;
+                strokeTick = 2;
+            }
+            else if (key.StartsWith("SHELL"))
+            {
+                stroke =  Brushes.Yellow;
+                strokeTick = 4;
+            }
+            
+            List<Polyline> polygons = new List<Polyline>();
 
-            foreach (var point in path)
+            foreach (var line in value)
             {
-                polygon.Points.Add(new Point(ScaleToCanvasX(point.x), ScaleToCanvasY(point.y)));
+                var polygon = new Polyline();
+                polygon.Stroke = stroke;
+                polygon.StrokeThickness = strokeTick;
+                
+                foreach (var point in line)
+                {
+                    polygon.Points.Add(new Point(ScaleToCanvasX(point.x), ScaleToCanvasY(point.y)));
+                }
+                
+                polygons.Add(polygon);
+                // polygon.Points.Add(new Point(double.NaN, double.NaN)); 
             }
 
             // Get polygon center
@@ -465,8 +488,11 @@ public partial class MainWindow : Window
             // polygon.RenderTransform = transformGroup;
             // //
             // // polygon.RenderTransform = new RotateTransform(180, polyCenter.X, polyCenter.Y);
-            
-            SliceCanvas.Children.Add(polygon);
+
+            foreach (var polygon in polygons)
+            {
+                SliceCanvas.Children.Add(polygon); 
+            }
         }
     }
     
