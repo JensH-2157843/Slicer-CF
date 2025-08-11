@@ -25,6 +25,7 @@ public partial class MainWindow : Window
     private Slicer? _slicer;
     private STLLoader? _stlLoader;
     private GCodeConverter? _gcodeConverter;
+    private Infill? _infill;
     private Gcodecoverter? _gcodeConverter2;
     private decimal _slicingPlaneHeight;
     private int _selectedSlicingLayer = 0;
@@ -55,6 +56,7 @@ public partial class MainWindow : Window
         this._stlLoader = new STLLoader();
         this._gcodeConverter = new GCodeConverter(slicerSettings);
         this._gcodeConverter2 = new Gcodecoverter();
+        this._infill = new Infill(slicerSettings);
     }
 
     /**
@@ -449,13 +451,19 @@ public partial class MainWindow : Window
             if (key == "PERIMETER")
             {
                 stroke = Brushes.Blue;
-                strokeTick = 2;
+                strokeTick = 1;
             }
             else if (key.StartsWith("SHELL"))
             {
                 stroke =  Brushes.Yellow;
-                strokeTick = 4;
+                strokeTick = 2;
             }
+            else if (key == "FLOOR" || key == "ROOF" || key == "INFILL")
+            {
+                stroke = Brushes.Green;
+                strokeTick = 1;
+            }
+
             
             List<Polyline> polygons = new List<Polyline>();
 

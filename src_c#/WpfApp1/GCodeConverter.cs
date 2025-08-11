@@ -21,7 +21,7 @@ public class GCodeConverter
         this.settings = settings;
     }
 
-    public void UpdateSlicerSettings(SlicerSettings updatedSettings)
+    public void  UpdateSlicerSettings(SlicerSettings updatedSettings)
     {
         this.settings = updatedSettings;
         
@@ -81,7 +81,7 @@ public class GCodeConverter
         return Math.Sqrt(Math.Pow(p2.x - p1.x, 2) + Math.Pow(p2.y - p1.y, 2));
     }
     
-    private static bool IsSame(double p1, double p2, double epsilon = 1e-8)
+    public static bool IsSame(double p1, double p2, double epsilon = 1e-8)
     {
         return Math.Abs(p1 - p2) < epsilon;
     }
@@ -417,7 +417,22 @@ public class GCodeConverter
             gcode.AddRange(gc);
             extrusionAmount += eA;
         }
-        
+
+        if (slice.ContainsKey("FLOOR"))
+        {
+            gc.Add($";FLOOR");
+            (gc , eA) = GenerateGCode(slice[$"FLOOR"], extrusionAmount, xOffset, yOffset, layer, false);
+            gcode.AddRange(gc);
+            extrusionAmount += eA;
+        }
+
+        if (slice.ContainsKey("ROOF"))
+        {
+            gc.Add($";ROOF");
+            (gc , eA) = GenerateGCode(slice[$"ROOF"], extrusionAmount, xOffset, yOffset, layer, false);
+            gcode.AddRange(gc);
+            extrusionAmount += eA;
+        }
         //Console.WriteLine(counter);
         return gcode;
     }

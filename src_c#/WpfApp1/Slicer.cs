@@ -172,6 +172,13 @@ public class Slicer
             slicingHeight += settings.LayerHeight;
             layer++;
         }
+
+        var floor = new Floor(settings);
+        slicesDictionary = floor.createFloor(slicesDictionary);
+
+        var roof = new Roof(settings);
+        slicesDictionary = roof.createRoof(slicesDictionary);
+       
             
         
         return slicesDictionary;
