@@ -133,9 +133,13 @@ public partial class MainWindow : Window
     {
         // Update in _slicer
         _slicer.UpdateSlicerSettings(updatedSettings);
+        _gcodeConverter.UpdateSlicerSettings(updatedSettings);
         
         // Update in GCodeconverter
-        _slicesDictionary = _slicer.SliceModel(_visualModel, _scaleFactor);
+        if (_visualModel != null)
+        {
+            _slicesDictionary = _slicer.SliceModel(_visualModel, _scaleFactor);
+        }
     }
 
 

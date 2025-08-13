@@ -348,6 +348,44 @@ public class GCodeConverter
         return Math.Abs(first.x - last.x) < epsilon && Math.Abs(first.y - last.y) < epsilon;
     }
 
+    private (List<string>, double) GenerateGCodeOpen(PathsD paths, double extrusionAmount, double xOffset,
+        double yOffset, double layer)
+    {
+        List<string> gcode = new List<string>();
+        PointD prev = new PointD();
+        double tolerance = 0.000001;
+
+        foreach (var path in paths)
+        {
+            if (path.Count < 2) continue; // Skip invalid paths
+
+            // Move to the start of the path
+            PointD startPoint = path[0];
+            if (!(Math.Abs(prev.x - startPoint.x) < tolerance && Math.Abs(startPoint.y - prev.y) < tolerance))
+            {
+                gcode.Add(GCodeCommands.MoveToPositionCommand(startPoint.x + xOffset, startPoint.y + yOffset, 1500));
+
+            }
+
+            // Extrude along the path
+            for (int i = 1; i < path.Count; i++)
+            {
+                PointD previousPoint = path[i - 1];
+                PointD currentPoint = path[i];
+
+                // double distance = CalculateDistance(previousPoint, currentPoint);
+                double extrusion = GCodeHelper.CalculateExtrusion(previousPoint, currentPoint, settings, false);
+                extrusionAmount += extrusion;
+
+                gcode.Add(GCodeCommands.ExtrudeToPositionCommand(currentPoint.x + xOffset, currentPoint.y + yOffset,
+                    extrusionAmount,
+                    500));
+                prev = currentPoint;
+            }
+        }
+        return (gcode, extrusionAmount);
+    }
+
     private (List<string>, double) GenerateGCode(PathsD paths, double extrusionAmount, double xOffset, double yOffset, double layer, bool needsToPrintFirst = true, bool isPerimeter = false)
     {
         List<string> gcode = new List<string>();
@@ -406,40 +444,45 @@ public class GCodeConverter
         List<string> gcode = new List<string>();
         double extrusionAmount = 0.0;
         
-        gcode.Add($";PERIMETER");
-        var (gc, eA) = GenerateGCode(slice["PERIMETER"], extrusionAmount, xOffset, yOffset, layer,true,true);
-        gcode.AddRange(gc);
-        extrusionAmount += eA;
+        var (gc, eA) = (new List<String>(), 0.0); 
+        
         for (int i = 0; i < settings.NumberShells; ++i)
         {
-            gc.Add($";SHELL {i}");
-            (gc , eA) = GenerateGCode(slice[$"SHELL{i}"], extrusionAmount, xOffset, yOffset, layer, false);
-            gcode.AddRange(gc);
-            extrusionAmount += eA;
+            if(slice.ContainsKey($"SHELL{i}"))
+            {
+                (gc , eA) = GenerateGCode(slice[$"SHELL{i}"], extrusionAmount, xOffset, yOffset, layer, i==0);
+                gcode.AddRange(gc);
+                extrusionAmount = eA;
+            }
         }
+        
+        gcode.Add($";PERIMETER");
+        (gc, eA) = GenerateGCode(slice["PERIMETER"], extrusionAmount, xOffset, yOffset, layer,false,true);
+        gcode.AddRange(gc);
+        extrusionAmount = eA;
 
         if (slice.ContainsKey("FLOOR"))
         {
             gc.Add($";FLOOR");
-            (gc , eA) = GenerateGCode(slice[$"FLOOR"], extrusionAmount, xOffset, yOffset, layer, false);
+            (gc , eA) = GenerateGCodeOpen(slice[$"FLOOR"], extrusionAmount, xOffset, yOffset, layer);
             gcode.AddRange(gc);
-            extrusionAmount += eA;
+            extrusionAmount = eA;
         }
 
         if (slice.ContainsKey("ROOF"))
         {
             gc.Add($";ROOF");
-            (gc , eA) = GenerateGCode(slice[$"ROOF"], extrusionAmount, xOffset, yOffset, layer, false);
+            (gc , eA) = GenerateGCodeOpen(slice[$"ROOF"], extrusionAmount, xOffset, yOffset, layer);
             gcode.AddRange(gc);
-            extrusionAmount += eA;
+            extrusionAmount = eA;
         }
 
         if (slice.ContainsKey("INFILL"))
         {
             gc.Add($";INFILL");
-            (gc , eA) = GenerateGCode(slice[$"INFILL"], extrusionAmount, xOffset, yOffset, layer, false);
+            (gc , eA) = GenerateGCodeOpen(slice[$"INFILL"], extrusionAmount, xOffset, yOffset, layer);
             gcode.AddRange(gc);
-            extrusionAmount += eA;
+            extrusionAmount = eA;
         }
         //Console.WriteLine(counter);
         return gcode;

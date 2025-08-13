@@ -53,7 +53,7 @@ public class Floor
                 else
                 {
                     temp.Add(new PointD(x, max.y));
-                    temp.Add(new PointD(x, max.y));
+                    temp.Add(new PointD(x, min.y));
                 }
                 floor.Add(temp);
                 xFirst = !xFirst;

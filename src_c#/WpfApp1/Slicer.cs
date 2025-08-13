@@ -158,7 +158,12 @@ public class Slicer
                 for (int i = 0; i < settings.NumberShells; ++i)
                 {
                     PathsD p = Clipper.InflatePaths(Oslice,-0.3 - 0.4 * i,JoinType.Square,EndType.Polygon);
-                    p = Clipper.SimplifyPaths(p, 0.025);
+                    //p = Clipper.SimplifyPaths(p, 0.025);
+                    if (p.Count() == 0)
+                    {
+                        Console.WriteLine("Warning! Empty slice.");
+                        break;
+                    }
                     foreach (PathD path in p)
                     {
                         path.Add(path[0]);

@@ -93,20 +93,40 @@ public class Infill
         double spacing = Decimal.ToDouble(_settings.NozzleDiameter) / 0.2;
 
         PathsD Grid = new PathsD();
+        
+        bool turn = true;
 
         for (var x = min.x; x <= max.x; x += spacing)
         {
             PathD line = new PathD();
-            line.Add(new PointD(x, min.y));
-            line.Add(new PointD(x, max.y));
+            if (turn)
+            {
+                line.Add(new PointD(x, min.y));
+                line.Add(new PointD(x, max.y));
+            }
+            else
+            {
+                line.Add(new PointD(x, max.y));
+                line.Add(new PointD(x, min.y));
+            }
+            turn = !turn;
             Grid.Add(line);
         }
 
         for (var y = min.y; y <= max.y; y += spacing)
         {
             PathD line = new PathD();
-            line.Add(new PointD(min.x, y));
-            line.Add(new PointD(max.x, y));
+            if (turn)
+            {
+                line.Add(new PointD(min.x, y));
+                line.Add(new PointD(max.x, y));
+            }
+            else
+            {
+                line.Add(new PointD(max.x, y));
+                line.Add(new PointD(min.x, y));
+            }
+            turn = !turn;
             Grid.Add(line);
         }
 
@@ -116,7 +136,7 @@ public class Infill
         {
             var value = path.Value;
             var innerPath = maxShell(value);
-
+            
             if (value.ContainsKey("FLOOR"))
             {
                 var result = new PathsD();
