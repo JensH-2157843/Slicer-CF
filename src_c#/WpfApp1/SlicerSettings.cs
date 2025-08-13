@@ -32,6 +32,9 @@ public class SlicerSettings : INotifyPropertyChanged
 
     public int NumberShells = 1;
 
+    public int Infill_Proc = 20;
+    public int Count_Floor = 3;
+
     
     /**
      * Following function can be used to update all setings at once
@@ -43,7 +46,9 @@ public class SlicerSettings : INotifyPropertyChanged
         int bedTemperature,
         decimal filamentDiameter,
         decimal extrusionRate,
-        int NShells)
+        int NShells,
+        int infill_Proc,
+        int count_Floor)
     {
         this.LayerHeight = layerHeight;
         this.NozzleDiameter = nozzleDiameter;
@@ -52,6 +57,8 @@ public class SlicerSettings : INotifyPropertyChanged
         this.FilamentDiameter = filamentDiameter;
         this.ExtrusionRate = extrusionRate;
         this.NumberShells = NShells;
+        this.Count_Floor = count_Floor;
+        this.Infill_Proc = infill_Proc;
         
         // bed width, depth and height
         // support

@@ -12,6 +12,9 @@ public class Slicer
     // private GeometryModel3D geometryModel;
     private const decimal tolerance = 0.0000001m;
     private SlicerSettings settings;
+    private Floor floor;
+    private Roof roof;
+    private Infill infill;
     
     /*private PathD clip = new PathD
     {
@@ -26,6 +29,10 @@ public class Slicer
     public Slicer(SlicerSettings settings)
     {
         this.settings = settings;
+        this.floor = new Floor(settings);
+        this.roof = new Roof(settings);
+        this.infill = new Infill(settings);
+        
     }
 
     public SlicerSettings Settings()
@@ -36,6 +43,9 @@ public class Slicer
     public void UpdateSlicerSettings(SlicerSettings updatedSettings)
     {
         this.settings = updatedSettings;
+        this.floor.UpdateFloor(updatedSettings);
+        this.roof.UpdateRoof(updatedSettings);
+        this.infill.UpdateInfill(updatedSettings);
         Console.WriteLine("Slicer settings updated in SLICER.");
         /*Console.WriteLine("Layerheight: " + updatedSettings.LayerHeight);
         Console.WriteLine("NozzleTemperature: " + updatedSettings.NozzleTemperature);
@@ -158,7 +168,7 @@ public class Slicer
                 for (int i = 0; i < settings.NumberShells; ++i)
                 {
                     PathsD p = Clipper.InflatePaths(Oslice,-0.3 - 0.4 * i,JoinType.Square,EndType.Polygon);
-                    //p = Clipper.SimplifyPaths(p, 0.025);
+                    p = Clipper.SimplifyPaths(p, 0.025);
                     if (p.Count() == 0)
                     {
                         Console.WriteLine("Warning! Empty slice.");
@@ -178,7 +188,7 @@ public class Slicer
             layer++;
         }
 
-        var floor = new Floor(settings);
+       
         slicesDictionary = floor.createFloor(slicesDictionary);
 
         var roof = new Roof(settings);

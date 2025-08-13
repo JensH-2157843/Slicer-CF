@@ -6,10 +6,16 @@ using Clipper2Lib;
 public class Infill
 {
     private SlicerSettings? _settings;
+    
 
     public Infill(SlicerSettings settings)
     {
         _settings = settings;
+    }
+    
+    public void UpdateInfill(SlicerSettings slicerSettings)
+    {
+        _settings = slicerSettings;
     }
     
     private PathsD maxShell(Dictionary<string, PathsD> paths)
@@ -90,7 +96,8 @@ public class Infill
     {
         // var infill_procent = _settings.
         var (min, max) = getMinMaxpointFromPaths(paths);
-        double spacing = Decimal.ToDouble(_settings.NozzleDiameter) / 0.2;
+        double procent = _settings.Infill_Proc / 100.0;
+        double spacing = Decimal.ToDouble(_settings.NozzleDiameter) / procent;
 
         PathsD Grid = new PathsD();
         

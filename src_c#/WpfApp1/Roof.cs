@@ -10,6 +10,11 @@ public class Roof
     {
         _slicerSettings = slicerSettings;
     }
+
+    public void UpdateRoof(SlicerSettings slicerSettings)
+    {
+        _slicerSettings = slicerSettings;
+    }
     
     private PathsD generateRoof(PathsD innerShell, bool XUpDown)
     {
@@ -87,13 +92,14 @@ public class Roof
 
     private PathsD isEligible(PathsD current, int currentKey, Dictionary<int, Dictionary<string, PathsD>> all_paths)
     {
-        if (currentKey >= all_paths.Keys.Count - 2)
+        if (currentKey >= all_paths.Keys.Count - _slicerSettings.Count_Floor)
             return current;
 
         PathsD joined_paths = new PathsD(maxShell(all_paths[currentKey + 1]));
-        for (var i = currentKey + 2; i <= currentKey + 2; i++)
+        
+        for (var i = currentKey + 2; i <= currentKey + _slicerSettings.Count_Floor; i++)
         {
-            var c = new ClipperD(); // fresh instance for each operation
+            var c = new ClipperD(); 
             c.AddPaths(joined_paths, PathType.Subject);
             c.AddPaths(maxShell(all_paths[i]), PathType.Clip);
 
@@ -112,13 +118,24 @@ public class Roof
             joined_paths = result;
         }
 
+        if (HasEnoughArea(joined_paths, 1))
+        {
+            return new PathsD();
+        }
+        
         return joined_paths;
+    }
+    
+    private bool HasEnoughArea(PathsD paths, double minArea)
+    {
+        double totalArea = paths.Sum(p => Math.Abs(Clipper.Area(p)));
+        return totalArea <= minArea;
     }
 
 
     public Dictionary<int, Dictionary<string, PathsD>> createRoof(Dictionary<int, Dictionary<string, PathsD>> paths)
     {
-        bool LeftToRight = false;
+        bool LeftToRight =  _slicerSettings.Count_Floor % 2 == 0;
         Dictionary<int, PathsD> roofs = new Dictionary<int, PathsD>();
         Dictionary<int, PathsD> roofInfill = new Dictionary<int, PathsD>();
 
@@ -133,6 +150,10 @@ public class Roof
                 roofs[key] = generateRoof(p, LeftToRight);
                 roofInfill[key] = p;
                 LeftToRight = !LeftToRight;
+            }
+            else
+            {
+                LeftToRight = _slicerSettings.Count_Floor % 2 == 0;
             }
         }
 

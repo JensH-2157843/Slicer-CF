@@ -27,6 +27,8 @@ public partial class SettingsWindow : Window
             FilamentDiameter = settings.FilamentDiameter,
             NozzleDiameter = settings.NozzleDiameter,
             NumberShells = settings.NumberShells,
+            Count_Floor = settings.Count_Floor,
+            Infill_Proc = settings.Infill_Proc
         };
         // DataContext = UpdatedSettings;
         // Binding didnt work properly so removed this
@@ -40,6 +42,8 @@ public partial class SettingsWindow : Window
         filamentDiam.Text = Formatter.FormatDecimal(_settings.FilamentDiameter);
         nozzleDiam.Text = Formatter.FormatDecimal(_settings.NozzleDiameter);
         numberShell.Text = Formatter.FormatInt(_settings.NumberShells);
+        infill_Proc.Text = Formatter.FormatInt(_settings.Infill_Proc);
+        count_Floor.Text = Formatter.FormatInt(_settings.Count_Floor);
     }
 
     private void UpdateAllValues()

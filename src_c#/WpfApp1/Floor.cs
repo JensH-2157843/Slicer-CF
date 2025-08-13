@@ -10,6 +10,11 @@ public class Floor
     {
         _slicerSettings = slicerSettings;
     }
+    
+    public void UpdateFloor(SlicerSettings slicerSettings)
+    {
+        _slicerSettings = slicerSettings;
+    }
 
     public PathsD generateFloor(PathsD innerShell, bool XUpDown)
     {
@@ -88,13 +93,13 @@ public class Floor
     
     private PathsD isEligible(PathsD current, int currentKey, Dictionary<int, Dictionary<string, PathsD>> all_paths)
     {
-        if (currentKey < 2)
+        if (currentKey < _slicerSettings.Count_Floor)
         {
             return current;
         }
 
         PathsD joined_paths = new PathsD(maxShell(all_paths[currentKey - 1]));
-        for (var i = currentKey - 2; i >= currentKey - 2; i--)
+        for (var i = currentKey - 2; i >= currentKey - _slicerSettings.Count_Floor; i--)
         {
             var c = new ClipperD(); // fresh instance for each operation
             c.AddPaths(joined_paths, PathType.Subject);
@@ -114,8 +119,18 @@ public class Floor
             c.Execute(ClipType.Difference, FillRule.NonZero, result);
             joined_paths = result;
         }
-
+        if (HasEnoughArea(joined_paths, 1))
+        {
+            return new PathsD();
+        }
+        
         return joined_paths;
+    }
+    
+    private bool HasEnoughArea(PathsD paths, double minArea)
+    {
+        double totalArea = paths.Sum(p => Math.Abs(Clipper.Area(p)));
+        return totalArea <= minArea;
     }
 
 
@@ -136,6 +151,10 @@ public class Floor
                 floors[key] = generateFloor(p, LeftToRight);
                 floorInfill[key] = p;
                 LeftToRight = !LeftToRight;
+            }
+            else
+            {
+                LeftToRight = false;
             }
         }
 
