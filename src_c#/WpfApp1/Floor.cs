@@ -123,7 +123,8 @@ public class Floor
     {
         bool LeftToRight = false;
         Dictionary<int, PathsD> floors = new Dictionary<int, PathsD>();
-
+        Dictionary<int, PathsD> floorInfill = new Dictionary<int, PathsD>();
+        
         foreach (var path in paths)
         {
             var key = path.Key;
@@ -133,6 +134,7 @@ public class Floor
             if (p.Count > 0 )
             {
                 floors[key] = generateFloor(p, LeftToRight);
+                floorInfill[key] = p;
                 LeftToRight = !LeftToRight;
             }
         }
@@ -141,6 +143,7 @@ public class Floor
         {
             var key = floor.Key;
             paths[key]["FLOOR"] = floor.Value;
+            paths[key]["FLOOR_INFILL"] = floorInfill[key];
         }
 
         return paths; 

@@ -120,6 +120,7 @@ public class Roof
     {
         bool LeftToRight = false;
         Dictionary<int, PathsD> roofs = new Dictionary<int, PathsD>();
+        Dictionary<int, PathsD> roofInfill = new Dictionary<int, PathsD>();
 
         foreach (var path in paths)
         {
@@ -130,6 +131,7 @@ public class Roof
             if (p.Count > 0 )
             {
                 roofs[key] = generateRoof(p, LeftToRight);
+                roofInfill[key] = p;
                 LeftToRight = !LeftToRight;
             }
         }
@@ -138,6 +140,7 @@ public class Roof
         {
             var key = roof.Key;
             paths[key]["ROOF"] = roof.Value;
+            paths[key]["ROOF_INFILL"] = roofInfill[key];
         }
 
         return paths; 

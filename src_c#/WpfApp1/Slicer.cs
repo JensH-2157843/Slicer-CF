@@ -178,6 +178,9 @@ public class Slicer
 
         var roof = new Roof(settings);
         slicesDictionary = roof.createRoof(slicesDictionary);
+
+        var infill = new Infill(settings);
+        slicesDictionary = infill.create_Infill(slicesDictionary);
        
             
         

@@ -433,6 +433,14 @@ public class GCodeConverter
             gcode.AddRange(gc);
             extrusionAmount += eA;
         }
+
+        if (slice.ContainsKey("INFILL"))
+        {
+            gc.Add($";INFILL");
+            (gc , eA) = GenerateGCode(slice[$"INFILL"], extrusionAmount, xOffset, yOffset, layer, false);
+            gcode.AddRange(gc);
+            extrusionAmount += eA;
+        }
         //Console.WriteLine(counter);
         return gcode;
     }

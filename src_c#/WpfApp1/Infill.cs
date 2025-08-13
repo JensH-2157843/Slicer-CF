@@ -11,6 +11,24 @@ public class Infill
     {
         _settings = settings;
     }
+    
+    private PathsD maxShell(Dictionary<string, PathsD> paths)
+    {
+        int maxShell = 0;
+
+        while (paths.ContainsKey($"SHELL{maxShell}"))
+        {
+            maxShell++;
+        }
+        --maxShell;
+        
+        if (maxShell == -1)
+        {
+            return paths["PERIMETER"];
+        }
+        
+        return paths[$"SHELL{maxShell}"];
+    }
 
     public static (PointD, PointD) getMinMaxpointFromPath(PathsD paths)
     {
@@ -72,6 +90,62 @@ public class Infill
     {
         // var infill_procent = _settings.
         var (min, max) = getMinMaxpointFromPaths(paths);
+        double spacing = Decimal.ToDouble(_settings.NozzleDiameter) / 0.2;
+
+        PathsD Grid = new PathsD();
+
+        for (var x = min.x; x <= max.x; x += spacing)
+        {
+            PathD line = new PathD();
+            line.Add(new PointD(x, min.y));
+            line.Add(new PointD(x, max.y));
+            Grid.Add(line);
+        }
+
+        for (var y = min.y; y <= max.y; y += spacing)
+        {
+            PathD line = new PathD();
+            line.Add(new PointD(min.x, y));
+            line.Add(new PointD(max.x, y));
+            Grid.Add(line);
+        }
+
+        var c = new ClipperD();
+        
+        foreach (var path in paths)
+        {
+            var value = path.Value;
+            var innerPath = maxShell(value);
+
+            if (value.ContainsKey("FLOOR"))
+            {
+                var result = new PathsD();
+                c.AddPaths(value["FLOOR_INFILL"], PathType.Clip);
+                c.AddPaths(innerPath, PathType.Subject);
+                c.Execute(ClipType.Difference,FillRule.NonZero,result);
+                innerPath = result;
+                c.Clear();
+            }
+            if (value.ContainsKey("ROOF"))
+            {
+                var result = new PathsD();
+                c.AddPaths(value["ROOF_INFILL"], PathType.Clip);
+                c.AddPaths(innerPath, PathType.Subject);
+                c.Execute(ClipType.Difference,FillRule.NonZero,result);
+                innerPath = result;
+                c.Clear();
+            }
+
+            if (innerPath.Count > 0)
+            {
+                var result = new PathsD();
+                c.AddPaths(innerPath, PathType.Clip);
+                c.AddPaths(Grid, PathType.Subject, true);
+                c.Execute(ClipType.Intersection,FillRule.NonZero,result, result);
+                path.Value["INFILL"] = result;
+                c.Clear();
+            }
+        }
         
         
 
