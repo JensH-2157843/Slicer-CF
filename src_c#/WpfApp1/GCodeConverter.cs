@@ -412,9 +412,12 @@ public class GCodeConverter
                         extrusionAmount,
                         500));
                 }
-                else isFirst = false;
-
-                gcode.Add(GCodeCommands.MoveToPositionCommand(startPoint.x + xOffset, startPoint.y + yOffset, 1500));
+                else
+                {
+                    isFirst = false;
+                    gcode.Add(GCodeCommands.MoveToPositionCommand(startPoint.x + xOffset, startPoint.y + yOffset, 1500));
+                }
+                
                 start = startPoint;
 
             }
@@ -450,7 +453,7 @@ public class GCodeConverter
         {
             if(slice.ContainsKey($"SHELL{i}"))
             {
-                (gc , eA) = GenerateGCode(slice[$"SHELL{i}"], extrusionAmount, xOffset, yOffset, layer, i==0);
+                (gc , eA) = GenerateGCode(slice[$"SHELL{i}"], extrusionAmount, xOffset, yOffset, layer, false);
                 gcode.AddRange(gc);
                 extrusionAmount = eA;
             }
@@ -561,7 +564,7 @@ public class GCodeConverter
         gcodeCommandList.AddRange(GetTemperatureSettingsCommands());
         
         // Print prime line
-        gcodeCommandList.AddRange(PrintPrimeLineCommands());
+        //gcodeCommandList.AddRange(PrintPrimeLineCommands());
         
         // Reset extruder postion to zero again to prepare for print
         gcodeCommandList.Add(GCodeCommands.ResetExtruderCommand());
