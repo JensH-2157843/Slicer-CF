@@ -54,6 +54,8 @@ public partial class SettingsWindow : Window
         UpdatedSettings.FilamentDiameter = Formatter.FormatStringDecimal(filamentDiam.Text);
         UpdatedSettings.NozzleDiameter = Formatter.FormatStringDecimal(nozzleDiam.Text);
         UpdatedSettings.NumberShells = Formatter.FormatStringToInt(numberShell.Text);
+        UpdatedSettings.Count_Floor = Formatter.FormatStringToInt(count_Floor.Text);
+        UpdatedSettings.Infill_Proc = Formatter.FormatStringToInt(infill_Proc.Text);
     }
     
     private void OnSaveSettingsClick(object sender, RoutedEventArgs e)
